@@ -339,18 +339,22 @@ window.Academy={awardVoyage:(id)=>{state.voyages=state.voyages||[];if(!state.voy
 </div>
 <script>
 (()=>{'use strict';
- let ctx=null,music=false,sfx=true,master=null,oscillators=[];
+ let ctx=null,music=false,sfx=true,master=null,oscillators=[],melodyTimer=null,step=0;
  const $=id=>document.getElementById(id);
  function audio(){if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C){$('spaceAudioStatus').textContent='Audio unavailable in this browser';return null}ctx=new C()}if(ctx.state==='suspended')ctx.resume();return ctx}
  function tone(freq,duration=.18,wave='sine',level=.055){const c=audio();if(!c||!sfx)return;const o=c.createOscillator(),g=c.createGain();o.type=wave;o.frequency.setValueAtTime(freq,c.currentTime);o.frequency.exponentialRampToValueAtTime(Math.max(45,freq*.68),c.currentTime+duration);g.gain.setValueAtTime(level,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+duration);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+duration)}
- function start(){const c=audio();if(!c)return;master=c.createGain();master.gain.value=.035;master.connect(c.destination);[55,82.4,110,164.8].forEach((hz,i)=>{const o=c.createOscillator(),g=c.createGain(),filter=c.createBiquadFilter();o.type=i?'triangle':'sine';o.frequency.value=hz;filter.type='lowpass';filter.frequency.value=420;g.gain.value=i?.16:.24;o.connect(filter);filter.connect(g);g.connect(master);o.start();oscillators.push(o)});music=true;$('spaceMusicButton').textContent='♫ Space music: ON';$('spaceMusicButton').setAttribute('aria-pressed','true');$('spaceAudioStatus').textContent='Original synthesized ambience playing'}
- function stop(){oscillators.forEach(o=>{try{o.stop()}catch(e){}});oscillators=[];if(master){master.disconnect();master=null}music=false;$('spaceMusicButton').textContent='♫ Space music: OFF';$('spaceMusicButton').setAttribute('aria-pressed','false');$('spaceAudioStatus').textContent='Built-in audio ready · works offline'}
+ function playNote(freq){if(!music||!ctx||!master)return;const o=ctx.createOscillator(),g=ctx.createGain(),f=ctx.createBiquadFilter();o.type='sine';o.frequency.value=freq;f.type='lowpass';f.frequency.value=1500;g.gain.setValueAtTime(.0001,ctx.currentTime);g.gain.linearRampToValueAtTime(.12,ctx.currentTime+.08);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+1.15);o.connect(f);f.connect(g);g.connect(master);o.start();o.stop(ctx.currentTime+1.2)}
+ function start(){const c=audio();if(!c||music)return;master=c.createGain();master.gain.value=.24;master.connect(c.destination);
+  [55,82.4,110,164.8].forEach((hz,i)=>{const o=c.createOscillator(),g=c.createGain(),filter=c.createBiquadFilter();o.type=i?'triangle':'sine';o.frequency.value=hz;filter.type='lowpass';filter.frequency.value=420;g.gain.value=i?.12:.18;o.connect(filter);filter.connect(g);g.connect(master);o.start();oscillators.push(o)});
+  music=true;step=0;const notes=[220,261.63,329.63,392,329.63,293.66,261.63,196,220,293.66,349.23,440,392,349.23,293.66,261.63];playNote(notes[step]);step=(step+1)%notes.length;melodyTimer=setInterval(()=>{playNote(notes[step]);step=(step+1)%notes.length},650);
+  $('spaceMusicButton').textContent='♫ Space music: ON';$('spaceMusicButton').setAttribute('aria-pressed','true');$('spaceAudioStatus').textContent='Original cinematic space melody playing'}
+ function stop(){music=false;if(melodyTimer){clearInterval(melodyTimer);melodyTimer=null}oscillators.forEach(o=>{try{o.stop()}catch(e){}});oscillators=[];if(master){master.disconnect();master=null} $('spaceMusicButton').textContent='♫ Space music: OFF';$('spaceMusicButton').setAttribute('aria-pressed','false');$('spaceAudioStatus').textContent='Built-in audio ready · works offline'}
  $('spaceMusicButton').addEventListener('click',()=>music?stop():start());
  $('spaceSfxButton').addEventListener('click',()=>{sfx=!sfx;$('spaceSfxButton').textContent=sfx?'🔊 SFX ON':'🔇 SFX OFF';$('spaceSfxButton').setAttribute('aria-pressed',String(sfx));if(sfx)tone(660,.12)});
- document.addEventListener('click',e=>{if(e.target.closest('#spaceAudioDock'))return;if(e.target.closest('button,a'))tone(520,.09,'sine',.035)});
- document.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')tone(520,.08,'sine',.025)});
+ function unlockMusic(e){if(e.target.closest&&e.target.closest('#spaceAudioDock'))return;if(!music)start();if(e.target.closest&&(e.target.closest('button')||e.target.closest('a')))tone(520,.09,'sine',.025);document.removeEventListener('pointerdown',unlockMusic);document.removeEventListener('keydown',unlockMusic)}
+ document.addEventListener('pointerdown',unlockMusic);document.addEventListener('keydown',unlockMusic);
 })();
-</script>
+</script></script>
 
 <script src="simulator/physics.js?v=parts-20261114-1"></script><script src="simulator/surface-engine.js?v=surface-20261114-1"></script><script src="outpost/engine.js"></script><script src="assets/page-navigation.js?v=pages-20261114-1"></script><script src="assets/dashboard-state.js?v=mission-control-20261114-1"></script><script src="assets/dashboard.js?v=mission-control-20261114-1"></script><script type="module" src="assets/dashboard-scene.js?v=mission-control-20261114-1"></script>
 
