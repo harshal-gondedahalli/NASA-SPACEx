@@ -53,14 +53,14 @@ canvas{display:block}
 <div id="buttons"><button class="action" id="lightBtn">Headlights: OFF</button><button class="action" id="musicBtn">Sound: OFF</button><button class="action" id="pauseBtn">Pause</button></div>
 <div id="controls"><b>ROVER CONTROLS</b><br>W / ↑ : Drive forward<br>S / ↓ : Reverse<br>A / ← : Turn left<br>D / → : Turn right<br>E : Collect sample<br>F : Headlights<br>P : Pause / Resume</div>
 <div id="hud"><div class="stat"><small>SPEED</small><strong id="speed">0 km/h</strong></div><div class="stat"><small>DISTANCE</small><strong id="distance">0 m</strong></div><div class="stat"><small>BATTERY</small><strong>96%</strong></div><div class="stat"><small>MISSION</small><strong id="missionHud">01</strong></div></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
-<script>
+<script type="module">
+import * as THREE from "../simulator/vendor/three.module.min.js";
 (() => {
 "use strict";
-if(!window.THREE){document.getElementById("message").textContent="Three.js could not load. Check your internet connection and refresh.";return;}
+
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x9a5942);scene.fog=new THREE.FogExp2(0x9a5942,0.008);
 const camera=new THREE.PerspectiveCamera(65,window.innerWidth/window.innerHeight,0.1,1200);
-const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(window.innerWidth,window.innerHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.appendChild(renderer.domElement);
+let renderer;try{renderer=new THREE.WebGLRenderer({antialias:true});}catch{document.getElementById("message").textContent="3D graphics are unavailable in this browser. Return to Space Voyage to try another mission.";document.body.dataset.renderer="unavailable";document.body.dataset.ready="true";return;}renderer.setSize(window.innerWidth,window.innerHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.appendChild(renderer.domElement);
 scene.add(new THREE.HemisphereLight(0xffd9bb,0x463027,2.0));
 const sun=new THREE.DirectionalLight(0xffe0bd,2.4);sun.position.set(-60,100,-40);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-100;sun.shadow.camera.right=100;sun.shadow.camera.top=100;sun.shadow.camera.bottom=-100;scene.add(sun);
 const mat=(color,roughness=0.8,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
@@ -115,7 +115,7 @@ function updateRover(dt){const forward=keys.KeyW||keys.ArrowUp,backward=keys.Key
 function updateDust(dt){const positions=dust.geometry.attributes.position.array;for(let i=0;i<dustCount;i++){const index=i*3;positions[index]+=dt*(dustStorm?15:2);positions[index+2]+=dt*(dustStorm?8:1);if(positions[index]>100)positions[index]=-100;if(positions[index+2]>100)positions[index+2]=-100;}dust.geometry.attributes.position.needsUpdate=true;dustMaterial.opacity=dustStorm?0.7:0.25;dustMaterial.size=dustStorm?0.55:0.3;}
 function animateSamples(time){samples.forEach(sample=>{if(!sample.active)return;sample.group.rotation.y=time*0.001;sample.group.position.y=terrainHeight(sample.group.position.x,sample.group.position.z)+0.6+Math.sin(time*0.002)*0.15;});}
 function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),0.04),time=performance.now();if(!paused){updateRover(dt);updateDust(dt);animateSamples(time);updateCamera(dt);}renderer.render(scene,camera);}
-animate();camera.position.set(0,7,13);camera.lookAt(0,1,0);
+animate();camera.position.set(0,7,13);camera.lookAt(0,1,0);document.body.dataset.renderer="webgl";document.body.dataset.ready="true";
 window.addEventListener("resize",()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);});
 showMessage("WELCOME TO MARS — SPACE BOYZ ROVER TRAINING");
 })();

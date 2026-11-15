@@ -28,7 +28,7 @@ for(const mobile of [false,true])test('Page navigation '+(mobile?'mobile':'deskt
   await page.reload();await route('a-gravity','a-gravity');assert(await page.locator('.dash-nav').isVisible());
   await fs.mkdir(path.join(root,'test-results'),{recursive:true});await page.screenshot({path:path.join(root,'test-results','page-navigation-activity-'+(mobile?'mobile':'desktop')+'.png')});
   await nav('voyage');await route('voyage');await aligned('voyage');await click('#voyage a[href="mark-15/"]');
-  await page.waitForFunction(()=>document.body.dataset.ready==='true');await click('#returnHome');await route('voyage');await aligned('voyage');
+  await page.waitForFunction(()=>document.body.dataset.ready==='true');await click('#returnLink');await route('voyage');await aligned('voyage');
   await click('.dash-nav a[href="solar-system/immersive.html"]');await page.waitForURL(base+'solar-system/immersive.html');
   await click('header a[href="../#home"]');await route('home');
   await page.goto(base+'solar-system/');await click('header a[href="../#missions"]');await route('missions');await aligned('missions');
