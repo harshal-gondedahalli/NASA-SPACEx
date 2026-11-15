@@ -19,17 +19,15 @@ test('collisions damage hull, separate the ship and respect recovery time',()=>{
  s.invulnerable=0;s.hull=25;s.x=o.x;s.y=o.y;E.step(s,{},1/120);assert.equal(s.phase,'failed');assert.match(s.message,/repairs/);
 });
 test('dock requires every gate and a safe approach speed',()=>{
- const s=flight();s.x=E.DOCK.x;s.y=E.DOCK.y;E.step(s,{},1/120);assert.equal(s.phase,'flying');s.gates.forEach(g=>g.done=true);s.vx=100;E.step(s,{},1/120);assert.equal(s.phase,'flying');s.vx=30;E.step(s,{},1/120);assert.equal(s.phase,'success');
+ const s=flight();s.x=E.DOCK.x;s.y=E.DOCK.y;E.step(s,{},1/120);assert.equal(s.phase,'flying');s.gates.forEach(g=>g.done=true);s.vx=100;E.step(s,{},1/120);assert.equal(s.phase,'flying');s.vx=30;E.step(s,{},1/120);assert.equal(s.phase,'flying','Gatekeeper must also be disabled');s.gatekeeper.nodes.forEach(n=>n.done=true);s.gatekeeper.defeated=true;E.step(s,{},1/120);assert.equal(s.phase,'success');
  const snapshot=JSON.stringify(s);advance(s,{thrust:true});assert.equal(JSON.stringify(s),snapshot,'Terminal states cannot earn or consume again');
 });
 test('pause freezes the model, timeout fails and restart resets all resources',()=>{
  const s=flight();s.phase='paused';const saved=JSON.stringify(s);advance(s,{thrust:true});assert.equal(JSON.stringify(s),saved);s.phase='flying';s.time=179.99;advance(s,{},.1);assert.equal(s.phase,'failed');assert.equal(E.create().fuel,100);assert.equal(E.create().hull,100);assert.equal(E.create().gates.filter(g=>g.done).length,0);
 });
 // Exercise the entire actual model with a simple navigation controller, not teleports.
-function pilot(s){const target=s.gates.find(g=>!g.done)||E.DOCK,dx=target.x-s.x,dy=target.y-s.y,d=Math.hypot(dx,dy),v=E.speed(s);
- const desired=Math.atan2(dy-s.vy*.7,dx-s.vx*.7),diff=Math.atan2(Math.sin(desired-s.angle),Math.cos(desired-s.angle));
- return {left:diff<-.05,right:diff>.05,thrust:Math.abs(diff)<.3&&v<(s.gates.every(g=>g.done)&&d<180?48:115),brake:(s.gates.every(g=>g.done)&&d<180&&v>45)||Math.abs(diff)>1.3&&v>65};
-}
+const {createPilot}=require('./helpers/voyage-pilot.cjs'),routes=new WeakMap();
+function pilot(s){if(!routes.has(s))routes.set(s,createPilot());return routes.get(s)(s);}
 test('a complete route is reachable with finite fuel and no collisions',()=>{
  const s=flight();for(let i=0;i<120*150&&s.phase==='flying';i++)E.step(s,pilot(s),1/120);
  assert.equal(s.phase,'success',JSON.stringify(s));assert.equal(s.gates.filter(g=>g.done).length,3);assert.equal(s.collisions,0);assert(s.fuel>0);assert(E.rating(s)>0);

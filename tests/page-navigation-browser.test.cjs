@@ -18,7 +18,7 @@ for(const mobile of [false,true])test('Page navigation '+(mobile?'mobile':'deskt
   const aligned=async id=>{try{await page.waitForFunction(id=>{const a=document.getElementById(id).getBoundingClientRect(),h=document.querySelector('.site-header').getBoundingClientRect();return h.top>=-2&&h.bottom>0&&a.top>=h.bottom-2&&a.top<innerHeight-80;},id);}catch(error){console.log('Route visibility',id,await page.evaluate(id=>({target:document.getElementById(id)?.getBoundingClientRect().toJSON(),header:document.querySelector('.site-header').getBoundingClientRect().toJSON(),url:location.href}),id));throw error;}};
   await page.goto(base+'#missions');await route('missions');await aligned('missions');
   assert.equal(await page.locator('.dash-nav a[aria-current]').getAttribute('href'),'#missions');
-  await click('button[onclick="MissionControl.voyage()"]');await route('testing','testing');
+  await click('#voyage button[onclick="MissionControl.voyage()"]');await route('testing','testing');
   assert(await page.locator('.dash-nav').isVisible());
   await nav('profile');await route('profile');await aligned('profile');
   await page.goBack({waitUntil:'commit'});await route('testing','testing');
@@ -27,8 +27,9 @@ for(const mobile of [false,true])test('Page navigation '+(mobile?'mobile':'deskt
   await nav('home');await route('home');await page.goBack({waitUntil:'commit'});await route('a-gravity','a-gravity');
   await page.reload();await route('a-gravity','a-gravity');assert(await page.locator('.dash-nav').isVisible());
   await fs.mkdir(path.join(root,'test-results'),{recursive:true});await page.screenshot({path:path.join(root,'test-results','page-navigation-activity-'+(mobile?'mobile':'desktop')+'.png')});
-  await nav('voyage');await route('voyage');await aligned('voyage');await click('.mark15-link');
-  await page.waitForFunction(()=>document.body.dataset.ready==='true');await click('#returnHome');await route('voyage');await aligned('voyage');
+  await nav('voyage');await route('voyage');await aligned('voyage');await click('#voyage a[href="mark-15/"]');
+  await page.waitForFunction(()=>document.body.dataset.ready==='true');await click('#returnLink');await route('voyage');await aligned('voyage');
+  await click('#voyage a[href="mark-16/"]');await page.waitForFunction(()=>document.body.dataset.ready==='true');assert(await page.locator('#menu').isVisible());assert(await page.locator('#startButton').isVisible());await click('#returnHome');await route('voyage');await aligned('voyage');
   await click('.dash-nav a[href="solar-system/immersive.html"]');await page.waitForURL(base+'solar-system/immersive.html');
   await click('header a[href="../#home"]');await route('home');
   await page.goto(base+'solar-system/');await click('header a[href="../#missions"]');await route('missions');await aligned('missions');
