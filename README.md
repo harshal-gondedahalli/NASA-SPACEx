@@ -35,7 +35,7 @@ Choose **🌍 → 🌙 Expedition** in Rocket Builder, or open settings and tap 
 
 ## Rocket Builder
 
-Open [Rocket Builder](https://hrashal-gondedahalli.github.io/NASA-SPACEx/simulator/?v=space-20261113-4).
+Open [Rocket Builder](https://hrashal-gondedahalli.github.io/NASA-SPACEx/simulator/?v=requests-20261115-1).
 
 - 17 illustrated parts across control, landing, protection, staging, fuel, engines, boosters, utility and aero. Tap or drag to add to either connected stage; tap fitted equipment to remove it. Counts are capped, and undo/save/load remain available.
 - Four tank sizes change fuel capacity, mass and visible height. Three engine types change thrust, efficiency and dry mass; choosing a type changes the selected stage's engine type. Side boosters add fuel, thrust and mass and require side releases.
