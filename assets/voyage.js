@@ -25,7 +25,7 @@ document.querySelectorAll('[data-flight]').forEach(b=>{
  }
  function announce(text){if(text!==lastAnnouncement){$('voyageLive').textContent=text;lastAnnouncement=text;}}
  function start(name){cancelAnimationFrame(frame);destinationName=name;s=E.create(name);countdown=3;lastHud=0;lastAnnouncement='';clearInput();$('launchActions').classList.add('hidden');$('pauseFlight').disabled=true;$('pauseFlight').textContent='Pause';
-  overlay('✦','Your voyage to '+name,'Pass all 3 glowing gates, then disable the MARK 15 GATEKEEPER by flying through its 3 cyan signal nodes. Avoid its central shield and the rocks, then brake to 65 or less inside the gold docking zone. Gates restore 12 fuel; signal nodes restore 5.'+(name==='Moon'?' Then land upright on the lunar pad. Brake uses fuel during landing; aim for vertical speed ≤ 28 and horizontal speed ≤ 15.':''),begin,'Ready for launch →');
+  overlay('✦','Your voyage to '+name,'Launch into a star-filled solar system. The Sun and all eight planets are shown along your flight path. Pass all 3 glowing gates, disable the MARK 15 GATEKEEPER through its 3 cyan signal nodes, avoid the rocks, then brake to 65 or less inside the gold arrival zone. Gates restore 12 fuel; signal nodes restore 5.'+(['Moon','Mars','Mercury','Venus'].includes(name)?' Then descend and land upright on the '+name+' surface pad. Brake uses fuel during landing; aim for vertical speed ≤ 28 and horizontal speed ≤ 15.':'') ,begin,'Ready for launch →');
   hud();render();last=0;accumulator=0;frame=requestAnimationFrame(loop);window.MissionControl?.refreshNav();
  }
  function begin(){s.phase='countdown';countdown=3;last=0;accumulator=0;$('pauseFlight').disabled=false;clearInput();canvas.focus({preventScroll:true});$('voyagePrimary').hidden=true;$('voyageTitle').textContent='3';$('voyageExplanation').textContent='Hands on the controls, astronaut.';}
@@ -37,7 +37,7 @@ document.querySelectorAll('[data-flight]').forEach(b=>{
   if(s.phase==='success'){
    const report={destination:destinationName,landed:s.stage==='landing',score:E.rating(s),fuel:Math.round(s.fuel),hull:s.hull,seconds:Math.round(s.time)};
    JuniorSave.data.voyage=report;JuniorSave.write();$('launchActions').classList.remove('hidden');
-   overlay('✧',s.stage==='landing'?'Lunar landing successful!':'Docking successful!',`${report.score}/100 flight score · ${report.hull}% hull · ${report.fuel}% fuel · ${report.seconds}s. ${s.message}`,()=>{$('continueFlight').click();},'Explore your destination →',true);
+   overlay('✧',s.stage==='landing'?'Planetary landing successful!':'Docking successful!',`${report.score}/100 flight score · ${report.hull}% hull · ${report.fuel}% fuel · ${report.seconds}s. ${s.message}`,()=>{$('continueFlight').click();},'Explore your destination →',true);
   }else overlay('↻','Let’s try that again',s.message,()=>start(destinationName),'Retry mission →');
   window.MissionControl?.refreshNav();
  }
@@ -48,7 +48,7 @@ document.querySelectorAll('[data-flight]').forEach(b=>{
   const next=s.gates.find(x=>!x.done),distance=Math.round(Math.hypot(s.x-(next||E.DOCK).x,s.y-(next||E.DOCK).y));
   const boss=s.gatekeeper,node=boss&&!boss.defeated?boss.nodes.find(n=>!n.done):null;const text=next?`Gate ${g+1} · ${distance} units away. Turn toward the cyan marker; thrust moves you in the direction your nose points.`:node?`MARK 15 GATEKEEPER · Signal node ${boss.nodes.filter(n=>n.done).length+1}/3 · ${Math.round(Math.hypot(s.x-node.x,s.y-node.y))} units away. Fly through each cyan node; avoid the central shield.`:v>65?'Gatekeeper disabled! Hold BRAKE and enter the gold zone at speed 65 or less.':'Gatekeeper disabled. Approach the gold docking zone at speed 65 or less.';
   $('flightReadout').textContent=s.stage==='landing'?`LUNAR DESCENT · Vertical ${Math.round(s.vy)} / 28 · Horizontal ${Math.round(Math.abs(s.vx))} / 15. Stay upright over the gold pad. THRUST slows descent; BRAKE uses fuel to stabilise.`:text;
-  if(s.stage==='landing'){canvas.setAttribute('aria-label','Lunar landing playfield. Stay upright over the gold pad. Thrust slows descent; brake stabilises using fuel. Vertical speed must be 28 or less, horizontal 15 or less.');announce('Lunar descent. Stay upright over the gold pad and brake for a soft landing.');}
+  if(s.stage==='landing'){canvas.setAttribute('aria-label','Planetary landing playfield. Stay upright over the gold pad. Thrust slows descent; brake stabilises using fuel. Vertical speed must be 28 or less, horizontal 15 or less.');announce('Planetary descent. Stay upright over the gold pad and brake for a soft landing.');}
   if(g!==lastHud){announce(g+' of 3 navigation gates complete. '+(g===3?'MARK 15 GATEKEEPER is online.':'Fuel replenished.'));lastHud=g;}if(s.gatekeeper?.defeated&&s.message.includes('Gatekeeper shield disabled'))announce(s.message);
  }
  function loop(t){if(!active()){stop();return;}const elapsed=last?Math.max(0,Math.min((t-last)/1000,.1)):0;last=t;
@@ -62,11 +62,49 @@ document.querySelectorAll('[data-flight]').forEach(b=>{
   ctx.setTransform(scale,0,0,scale,0,0);ctx.fillStyle='#070f21';ctx.fillRect(0,0,viewW,E.H);
   const nebula=ctx.createRadialGradient(viewW*.7,140,0,viewW*.7,140,500);nebula.addColorStop(0,'#20344b');nebula.addColorStop(1,'#070f21');ctx.fillStyle=nebula;ctx.fillRect(0,0,viewW,E.H);
   for(const a of stars){const x=((a.x-camera*.25)%viewW+viewW)%viewW;ctx.globalAlpha=.3+(a.r/3);ctx.fillStyle='#d8eaff';ctx.beginPath();ctx.arc(x,a.y,a.r,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
+  // Wide solar-system panorama: the Sun and all eight planets stay in the
+  // flight world, so the spacecraft travels through a visible planetary system.
   ctx.save();ctx.translate(-camera,0);
-  if(s.stage==='landing'){ctx.fillStyle='#666775';ctx.fillRect(0,E.PAD.y,E.W,E.H-E.PAD.y);ctx.fillStyle='#ffd166';ctx.fillRect(E.PAD.x-E.PAD.halfWidth,E.PAD.y-5,E.PAD.halfWidth*2,5);ctx.fillStyle='#ffe7a3';ctx.font='bold 14px system-ui';ctx.textAlign='center';ctx.fillText('LAND UPRIGHT · VERTICAL ≤ 28 · HORIZONTAL ≤ 15',E.PAD.x,E.PAD.y+30);}
+  const sun={x:115,y:270};
+  const worlds=[
+   {name:'MERCURY',x:275,y:245,r:10,c:'#a9a39b'},
+   {name:'VENUS',x:440,y:315,r:16,c:'#e4bd83'},
+   {name:'EARTH',x:635,y:205,r:19,c:'#398fe0'},
+   {name:'MARS',x:825,y:340,r:14,c:'#c96b50'},
+   {name:'JUPITER',x:1110,y:155,r:39,c:'#d7b28b'},
+   {name:'SATURN',x:1400,y:390,r:34,c:'#e3d09c',rings:true},
+   {name:'URANUS',x:1650,y:185,r:25,c:'#9bd8d4'},
+   {name:'NEPTUNE',x:1880,y:355,r:24,c:'#527fd4'}
+  ];
+  ctx.save();ctx.globalAlpha=.42;ctx.strokeStyle='#8fb9e0';ctx.lineWidth=1.4;
+  worlds.forEach((p,i)=>{ctx.beginPath();ctx.ellipse(sun.x,sun.y,p.x-sun.x,(p.x-sun.x)*.19,0,0,Math.PI*2);ctx.stroke();});
+  ctx.restore();
+  const sunGlow=ctx.createRadialGradient(sun.x,sun.y,8,sun.x,sun.y,105);
+  sunGlow.addColorStop(0,'#fffbd2');sunGlow.addColorStop(.22,'#ffd36b');sunGlow.addColorStop(.55,'#ff8b32aa');sunGlow.addColorStop(1,'#ff6b2400');
+  ctx.fillStyle=sunGlow;ctx.beginPath();ctx.arc(sun.x,sun.y,105,0,Math.PI*2);ctx.fill();
+  const sunCore=ctx.createRadialGradient(sun.x-18,sun.y-20,2,sun.x,sun.y,48);
+  sunCore.addColorStop(0,'#fffde2');sunCore.addColorStop(.55,'#ffd45e');sunCore.addColorStop(1,'#ff7b25');
+  ctx.fillStyle=sunCore;ctx.beginPath();ctx.arc(sun.x,sun.y,48,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff0bf';ctx.font='bold 15px system-ui';ctx.textAlign='center';ctx.fillText('SUN',sun.x,sun.y-66);
+  worlds.forEach((p,i)=>{
+   const glow=ctx.createRadialGradient(p.x-p.r*.35,p.y-p.r*.4,1,p.x,p.y,p.r*1.7);
+   glow.addColorStop(0,'#ffffff55');glow.addColorStop(.45,p.c);glow.addColorStop(1,'#10172b');
+   ctx.fillStyle=glow;ctx.beginPath();ctx.arc(p.x,p.y,p.r*1.25,0,Math.PI*2);ctx.fill();
+   if(p.name==='EARTH'){ctx.strokeStyle='#8de0ff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x-3,p.y-2,p.r*.72,-.9,1.5);ctx.stroke();}
+   if(p.name==='JUPITER'){ctx.save();ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.clip();for(let k=-2;k<=2;k++){ctx.fillStyle=k%2?'#f3d7ad99':'#9c654b88';ctx.fillRect(p.x-p.r,p.y+k*13,p.r*2,6);}ctx.restore();}
+   if(p.rings){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(-.18);ctx.strokeStyle='#f0dfb4';ctx.lineWidth=7;ctx.beginPath();ctx.ellipse(0,0,p.r*1.85,p.r*.58,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#b9a77d';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,0,p.r*2.05,p.r*.7,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
+   ctx.fillStyle='#e6f1ff';ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.fillText(p.name,p.x,p.y+p.r+25);
+  });
+  ctx.restore();
+  ctx.save();ctx.translate(-camera,0);
+  if(s.stage==='landing'){const surface=s.destination==='Mars'?'#7c443b':s.destination==='Venus'?'#9b7048':s.destination==='Mercury'?'#77736d':'#666775';const horizon=ctx.createLinearGradient(0,300,0,540);horizon.addColorStop(0,surface);horizon.addColorStop(1,'#242632');ctx.fillStyle=horizon;ctx.fillRect(0,300,E.W,240);for(let i=0;i<18;i++){const x=(i*137+53)%E.W,y=350+(i*29)%145;ctx.strokeStyle='#171c2b66';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x,y,12+(i%5)*5,4+(i%3)*3,0,0,Math.PI*2);ctx.stroke();}ctx.fillStyle='#ffd166';ctx.fillRect(E.PAD.x-E.PAD.halfWidth,E.PAD.y-5,E.PAD.halfWidth*2,5);ctx.fillStyle='#ffe7a3';ctx.font='bold 14px system-ui';ctx.textAlign='center';ctx.fillText('LAND UPRIGHT · VERTICAL ≤ 28 · HORIZONTAL ≤ 15',E.PAD.x,E.PAD.y+30);}
   else {
   ctx.strokeStyle='#264457';ctx.setLineDash([4,15]);ctx.beginPath();ctx.moveTo(90,270);s.gates.forEach(g=>ctx.lineTo(g.x,g.y));ctx.lineTo(E.DOCK.x,E.DOCK.y);ctx.stroke();ctx.setLineDash([]);
-  const planet=ctx.createRadialGradient(1840,170,10,1840,270,260);planet.addColorStop(0,'#4b7b8e');planet.addColorStop(.6,'#283c63');planet.addColorStop(1,'#101c36');ctx.fillStyle=planet;ctx.beginPath();ctx.arc(1970,280,230,0,Math.PI*2);ctx.fill();
+  const worldStyle={Moon:['#d9dce2','#737d91'],Mars:['#ffb078','#8d382e'],Jupiter:['#f5d09a','#9a6244'],Saturn:['#f4dfa9','#9b8155'],Mercury:['#c9c4bd','#625d59'],Venus:['#ffe2a0','#a96c3d'],'Asteroid Belt':['#8c929d','#414956'],'Earth Orbit':['#8bdcff','#1859a5'],Uranus:['#c9fff2','#428c94'],Neptune:['#8ebcff','#173c9a'],Pluto:['#e6d7c4','#766b69']}[s.destination]||['#8bdcff','#1859a5'];
+  const planet=ctx.createRadialGradient(1905,190,8,1970,280,245);planet.addColorStop(0,worldStyle[0]);planet.addColorStop(.55,worldStyle[1]);planet.addColorStop(1,'#101426');ctx.fillStyle=planet;ctx.beginPath();ctx.arc(1970,280,230,0,Math.PI*2);ctx.fill();
+  if(s.destination==='Saturn'){ctx.save();ctx.translate(1970,280);ctx.rotate(-.22);ctx.strokeStyle='#e7d5a4aa';ctx.lineWidth=22;ctx.beginPath();ctx.ellipse(0,0,310,83,0,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#fff0c477';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(0,0,340,95,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
+  if(s.destination==='Jupiter'||s.destination==='Venus'||s.destination==='Mars'){ctx.save();ctx.beginPath();ctx.arc(1970,280,226,0,Math.PI*2);ctx.clip();for(let k=0;k<7;k++){ctx.fillStyle=s.destination==='Jupiter'?(k%2?'#f4d7ad55':'#7b4c3d44'):'#ffffff18';ctx.fillRect(1745,110+k*48,450,17);}ctx.restore();}
+  ctx.fillStyle='#dcecff';ctx.font='bold 15px system-ui';ctx.textAlign='center';ctx.fillText(s.destination.toUpperCase(),1830,35);
   for(const [i,g]of s.gates.entries()){ctx.strokeStyle=g.done?'#4d706f':'#69e9db';ctx.lineWidth=g.done?2:4;ctx.beginPath();ctx.arc(g.x,g.y,g.r,0,Math.PI*2);ctx.stroke();ctx.fillStyle=g.done?'#8fc2b8':'#c5fff0';ctx.font='bold 15px system-ui';ctx.textAlign='center';ctx.fillText(g.done?'✓':String(i+1),g.x,g.y-g.r-13);}
   const boss=s.gatekeeper;if(boss&&!boss.defeated&&s.gates.every(g=>g.done)){ctx.save();ctx.translate(boss.x,boss.y);ctx.rotate(s.time*.32);ctx.strokeStyle='#ff8a68';ctx.lineWidth=5;ctx.beginPath();ctx.arc(0,0,boss.r+10,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#ffcb85';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,boss.r-9,0,Math.PI*2);ctx.stroke();ctx.restore();const glow=ctx.createRadialGradient(boss.x-12,boss.y-15,5,boss.x,boss.y, boss.r);glow.addColorStop(0,'#ffdfb0');glow.addColorStop(.45,'#d35f55');glow.addColorStop(1,'#492b50');ctx.fillStyle=glow;ctx.beginPath();ctx.arc(boss.x,boss.y,boss.r,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff0d6';ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.fillText('MARK 15',boss.x,boss.y-5);ctx.fillText('GATEKEEPER',boss.x,boss.y+12);for(const [i,n]of boss.nodes.entries()){ctx.strokeStyle=n.done?'#527b72':'#73f5e8';ctx.lineWidth=n.done?3:5;ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.stroke();ctx.fillStyle=n.done?'#8fc2b8':'#c9fff6';ctx.beginPath();ctx.arc(n.x,n.y,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#d8fff9';ctx.font='bold 11px system-ui';ctx.fillText(n.done?'SYNCED':'SIGNAL '+(i+1),n.x,n.y-n.r-9);}}else if(boss?.defeated){ctx.fillStyle='#8cebd2';ctx.font='bold 13px system-ui';ctx.textAlign='center';ctx.fillText('GATEKEEPER DISABLED',boss.x,boss.y-75);}
   for(const [i,o]of s.obstacles.entries()){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(i*.8);ctx.fillStyle='#776b67';ctx.strokeStyle='#b5a39a';ctx.lineWidth=2;ctx.beginPath();for(let j=0;j<9;j++){const a=j/9*Math.PI*2,r=o.r*(j%2?.85:1);if(j===0)ctx.moveTo(Math.cos(a)*r,Math.sin(a)*r);else ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#4e4949';ctx.beginPath();ctx.arc(-o.r*.2,-o.r*.15,o.r*.25,0,Math.PI*2);ctx.fill();ctx.restore();}

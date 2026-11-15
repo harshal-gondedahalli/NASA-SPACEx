@@ -28,7 +28,7 @@ a{color:var(--cyan)} header{flex-wrap:wrap}.build-layout>*{min-width:0}button,a{
 @media(max-width:650px){.gravity-game-frame{height:1080px}.gravity-game-head{align-items:flex-start}}
 </style>
 <link rel="stylesheet" href="assets/voyage.css?v=mark15-gatekeeper-20261115">
-<script src="assets/voyage-engine.js?v=mark15-gatekeeper-20261115"></script>
+<script src="assets/voyage-engine.js?v=solar-landing-20261115"></script>
 <link rel="stylesheet" href="assets/dashboard.css?v=pages-20261114-1">
 </head>
 <body>
@@ -123,7 +123,10 @@ const worlds=[
 {name:'Mercury',emoji:'☀️',distance:'Inner planet',challenge:'Survey the rocky planet in the intense sunlight.'},
 {name:'Venus',emoji:'🟡',distance:'Cloud-covered world',challenge:'Study the thick atmosphere using a satellite.'},
 {name:'Asteroid Belt',emoji:'☄️',distance:'Deep-space route',challenge:'Map a small asteroid and collect science data.'},
-{name:'Earth Orbit',emoji:'🌍',distance:'Home orbit',challenge:'Deploy an observation satellite above Earth.'}
+{name:'Earth Orbit',emoji:'🌍',distance:'Home orbit',challenge:'Deploy an observation satellite above Earth.'},
+{name:'Uranus',emoji:'🩵',distance:'Ice giant',challenge:'Observe the blue-green ice giant from a safe orbital flyby.'},
+{name:'Neptune',emoji:'🔵',distance:'Distant ice giant',challenge:'Explore the distant blue world from orbit.'},
+{name:'Pluto',emoji:'🧊',distance:'Dwarf planet',challenge:'Visit the icy dwarf planet and map its frozen plains.'}
 ];
 const parts=[
 {id:'engine',name:'Engine',emoji:'🔥',desc:'Provides thrust',cost:15},
@@ -241,7 +244,7 @@ window.Academy={awardVoyage:(id)=>{state.voyages=state.voyages||[];if(!state.voy
 })();
 
 </script>
-<script src="assets/voyage.js?v=mark15-gatekeeper-20261115"></script>
+<script src="assets/voyage.js?v=solar-system-flight-20261115"></script>
 <script>
 (()=>{
  const names={home:'Mission Control','a-launch':'Launch training',destination:'Choose destination',workshop:'Rocket Building',testing:'Rocket readiness',launch:'Space Voyage',explore:'Mission objectives',returned:'Mission results','a-planets':'Planet Explorer','a-gravity':'Gravity Playground'};
