@@ -1,14 +1,124 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111b22"><title>Mark 15 · Surface Explorer</title><link rel="icon" href="data:,"><link rel="stylesheet" href="style.css?v=requests-20261115-1"><script src="engine.js?v=requests-20261115-1"></script></head><body>
-<canvas id="scene" tabindex="0" aria-label="3D mission. Drag to orbit the camera. WASD or arrows to drive; E to interact."></canvas>
-<header><a id="returnHome" href="../#voyage">← Space Voyage</a><span class="brand">MARK <b>15</b></span><div class="nav-actions"><button id="menuButton" aria-label="Open missions">☰ Missions</button><button id="pauseButton" aria-label="Pause mission">Ⅱ</button><button id="helpButton" aria-label="Help and graphics settings">?</button></div></header>
-<section id="hud" aria-label="Mission instruments"><div class="hud-title"><span class="live-dot"></span><b id="missionName">Mars Rover</b><span id="vehicleName">rover</span></div><div class="gauges"><div><small>ENERGY</small><b><span id="energy">100</span>%</b><progress id="energyBar" value="100" max="100" aria-label="Energy remaining"></progress></div><div id="sampleGauge"><small>SAMPLES</small><b><span id="samples">0</span><em>/5</em></b></div><div><small>SCORE</small><b id="score">0</b></div></div></section>
-<div id="navigation" class="target"><span id="targetArrow">↑</span><div><b id="targetName">Sample 1</b><small id="targetDistance">35 m</small></div></div>
-<p id="message" role="status" aria-live="polite"></p><div id="paused" hidden>MISSION PAUSED</div><p id="storageStatus" class="storage" role="status"></p>
-<div id="cameraTools"><button id="musicToggle" aria-label="Turn music off" aria-pressed="true">♫</button><button id="zoomIn" aria-label="Zoom in">＋</button><button id="zoomOut" aria-label="Zoom out">−</button><button id="centerCamera" aria-label="Reset camera">⌖</button></div>
-<div id="mobile" aria-label="Mission controls"><div class="drive-pad"><button data-key="KeyW" aria-label="Move forward">▲</button><button data-key="KeyA" aria-label="Turn left">◀</button><button data-key="KeyS" aria-label="Move backward">▼</button><button data-key="KeyD" aria-label="Turn right">▶</button></div><div class="action-pad"><div id="verticalControls"><button data-key="Space" aria-label="Fly up">↑</button><button data-key="ShiftLeft" aria-label="Fly down">↓</button></div><button data-key="KeyE" id="interactButton">✦ Collect</button></div></div>
-<p class="keyboard-hint">WASD / arrows · E interact · P pause · Drag to look</p>
-<section id="menu" aria-label="Choose a mission"><div class="menu-panel"><p class="eyebrow">JUNIOR ASTRONAUT · SURFACE EXPLORER</p><h1>Small pilot.<br><span>Big worlds.</span></h1><p>Drive. Discover. Explore.</p><label for="missionSelect">Your adventure</label><select id="missionSelect"><option value="mars">Mars Rover Exploration</option><option value="moon">Moon Landing Mission</option><option value="space">Deep Space Pilot</option><option value="walk">Astronaut Spacewalk</option><option value="emergency">Emergency Training</option></select><button id="startButton" class="primary">Start mission ↗</button><button id="resumeButton" hidden>Continue mission ↗</button><button id="restartButton" hidden>↶ Restart this mission</button><div style="display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;font-size:12px"><a href="../simulator/?survey=new">⌂ Walk inside Moonbase</a><a href="../space-lab/?mode=dock">◎ ISS docking</a><a href="../space-lab/?mode=satellite">🛰 Satellite</a><a href="../space-lab/?mode=explore">🚀 Spacecraft</a></div><small id="menuSaveStatus">Progress saves on this device.</small></div></section>
-<dialog id="help"><div class="dialog-head"><h2>Ready, explorer?</h2><button id="closeHelp" aria-label="Close help">✕</button></div><div class="help-grid"><p>▲ Move<br>◀ ▶ Turn<br>✦ Collect / interact</p><p>Drag: look around<br>＋ − Zoom<br>↑ ↓ Fly (spacecraft)</p></div><label for="qualitySelect">Graphics</label><select id="qualitySelect"><option value="auto">Auto · fit this device</option><option value="hd">HD · detailed terrain & shadows</option><option value="balanced">Balanced · lighter graphics</option></select><p class="note">Illustrative terrain and vehicles. This is an exploration game, not a flight-physics simulator.</p></dialog>
-<dialog id="emergency"><h2>⚠ Crew check</h2><p id="emergencyText"></p><button id="choice0"></button><button id="choice1"></button><button id="leaveEmergency">← Missions</button></dialog>
-<div id="rendererError" hidden role="alert"><h2>3D graphics unavailable</h2><p>Enable hardware acceleration or try another browser.</p><a href="../">← Return to Mission Control</a></div>
-<script type="module" src="app.js?v=requests-20261115-1"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPACE BOYZ - Mars Rover Training | Mark 15</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#090d16;color:white;font-family:Arial,Helvetica,sans-serif}
+canvas{display:block}
+#top{position:absolute;top:12px;left:50%;transform:translateX(-50%);text-align:center;width:90%;pointer-events:none;text-shadow:0 2px 8px #000}
+#top h1{margin:0;font-size:30px;letter-spacing:5px}
+#school{color:#ffd58a;font-size:12px;font-weight:bold;letter-spacing:2px;margin-top:5px}
+#mentor{color:#d7e5ff;font-size:11px;margin-top:4px}
+.panel{position:absolute;background:rgba(5,12,24,.84);border:1px solid rgba(117,180,255,.45);border-radius:12px;padding:13px;box-shadow:0 5px 25px #0008;backdrop-filter:blur(8px)}
+#left{top:125px;left:14px;width:225px}
+#right{top:125px;right:14px;width:220px}
+.panel h3{margin:0 0 10px;color:#83caff;font-size:14px;letter-spacing:1px}
+.panel p{font-size:12px;line-height:1.6;color:#d7e3f4;margin:6px 0}
+.mission{display:block;width:100%;margin:7px 0;padding:10px;color:white;background:#14263b;border:1px solid #345777;border-radius:7px;cursor:pointer;text-align:left;font-size:12px}
+.mission:hover,.mission.active{background:#17639a;border-color:#70caff}
+#hud{position:absolute;bottom:15px;left:50%;transform:translateX(-50%);display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:95%}
+.stat{min-width:100px;padding:10px 14px;border-radius:9px;background:#06101edc;border:1px solid #47749c;text-align:center}
+.stat small{display:block;color:#9db8d1;font-size:10px}
+.stat strong{display:block;font-size:18px;margin-top:3px;color:#fff}
+#message{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);background:#071321df;border:1px solid #5ba9e8;border-radius:9px;padding:10px 18px;font-size:13px;text-align:center;max-width:90%}
+#controls{position:absolute;right:15px;bottom:115px;color:#d7e3f4;background:#071321d9;border:1px solid #45627d;border-radius:9px;padding:10px;font-size:11px;line-height:1.7}
+#buttons{position:absolute;left:15px;bottom:115px;display:flex;gap:7px;flex-wrap:wrap;max-width:220px}
+.action{padding:9px 12px;color:white;background:#164a70;border:1px solid #67baff;border-radius:7px;cursor:pointer}
+.action:hover{background:#217bb4}
+#returnLink{position:absolute;top:14px;left:14px;z-index:5;color:#d7eaff;text-decoration:none;background:#071321d9;border:1px solid #45627d;border-radius:8px;padding:8px 11px;font-size:12px}
+@media(max-width:700px){
+#left{top:110px;width:165px;padding:9px}
+#right{top:110px;width:160px;padding:9px}
+.panel p{font-size:10px}
+.mission{font-size:10px;padding:7px}
+#top h1{font-size:22px}
+#controls{display:none}
+.stat{min-width:75px;padding:7px}
+#buttons{bottom:105px;max-width:160px}
+.action{padding:8px;font-size:11px}
+#message{bottom:85px}
+#returnLink{top:auto;bottom:165px}
+}
+</style>
+</head>
+<body>
+<a id="returnLink" href="../#voyage">← SPACE VOYAGE</a>
+<div id="top"><h1>SPACE BOYZ</h1><div id="school">SRI RAMAKRISHNA GURUKULA • ANUPINAKATTE</div><div id="mentor">MENTOR: SHOBHA MISS</div></div>
+<div id="left" class="panel"><h3>MISSION GUIDANCE</h3><p id="missionName">MARS ROVER EXPLORATION</p><p id="guidance">Drive across the Martian surface. Explore the terrain and collect scientific samples.</p><p>Explore the red planet and watch your rover telemetry.</p><p id="sampleText">Samples collected: 0 / 5</p></div>
+<div id="right" class="panel"><h3>MISSION SELECT</h3><button class="mission active" data-mission="explore">01 • Mars Rover Exploration</button><button class="mission" data-mission="mountain">02 • Mountain Expedition</button><button class="mission" data-mission="storm">03 • Mars Dust Storm</button><hr style="border-color:#29445d"><h3>ROVER SYSTEMS</h3><p id="systemStatus">All systems operational</p><p>Drive system: ONLINE</p><p>Navigation: ACTIVE</p><p>Solar power: 96%</p></div>
+<div id="message">MISSION READY — PRESS W TO DRIVE</div>
+<div id="buttons"><button class="action" id="lightBtn">Headlights: OFF</button><button class="action" id="musicBtn">Sound: OFF</button><button class="action" id="pauseBtn">Pause</button></div>
+<div id="controls"><b>ROVER CONTROLS</b><br>W / ↑ : Drive forward<br>S / ↓ : Reverse<br>A / ← : Turn left<br>D / → : Turn right<br>E : Collect sample<br>F : Headlights<br>P : Pause / Resume</div>
+<div id="hud"><div class="stat"><small>SPEED</small><strong id="speed">0 km/h</strong></div><div class="stat"><small>DISTANCE</small><strong id="distance">0 m</strong></div><div class="stat"><small>BATTERY</small><strong>96%</strong></div><div class="stat"><small>MISSION</small><strong id="missionHud">01</strong></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+<script>
+(() => {
+"use strict";
+if(!window.THREE){document.getElementById("message").textContent="Three.js could not load. Check your internet connection and refresh.";return;}
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x9a5942);scene.fog=new THREE.FogExp2(0x9a5942,0.008);
+const camera=new THREE.PerspectiveCamera(65,window.innerWidth/window.innerHeight,0.1,1200);
+const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(window.innerWidth,window.innerHeight);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xffd9bb,0x463027,2.0));
+const sun=new THREE.DirectionalLight(0xffe0bd,2.4);sun.position.set(-60,100,-40);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-100;sun.shadow.camera.right=100;sun.shadow.camera.top=100;sun.shadow.camera.bottom=-100;scene.add(sun);
+const mat=(color,roughness=0.8,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
+const redSoil=mat(0x9b4930),darkSoil=mat(0x663323),rockMat=mat(0x765044),darkRock=mat(0x493a35),metal=mat(0x9da8ad,0.38,0.8),darkMetal=mat(0x27343d,0.48,0.7),whiteMetal=mat(0xcbd2d1,0.42,0.65),blackRubber=mat(0x17191b,0.92),gold=mat(0xc49a48,0.45,0.65);
+function terrainHeight(x,z){return Math.sin(x*0.035)*0.65+Math.cos(z*0.045)*0.55+Math.sin((x+z)*0.022)*0.45;}
+function makeTerrain(){const size=1000,segments=180,geometry=new THREE.PlaneGeometry(size,size,segments,segments);geometry.rotateX(-Math.PI/2);const pos=geometry.attributes.position;for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i);pos.setY(i,terrainHeight(x,z));}geometry.computeVertexNormals();const ground=new THREE.Mesh(geometry,redSoil);ground.receiveShadow=true;scene.add(ground);}makeTerrain();
+const random=(min,max)=>min+Math.random()*(max-min);
+function createRock(x,z,scale=1){const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(1,1),Math.random()>0.5?rockMat:darkRock);rock.position.set(x,terrainHeight(x,z)+0.35*scale,z);rock.scale.set(scale*random(0.65,1.3),scale*random(0.35,0.8),scale*random(0.65,1.3));rock.rotation.set(random(0,1),random(0,6),random(0,1));rock.castShadow=true;rock.receiveShadow=true;scene.add(rock);}
+function createCrater(x,z,radius){const ring=new THREE.Mesh(new THREE.TorusGeometry(radius,0.7,8,40),darkSoil);ring.rotation.x=Math.PI/2;ring.position.set(x,terrainHeight(x,z)+0.05,z);ring.scale.y=0.72;scene.add(ring);const inside=new THREE.Mesh(new THREE.CircleGeometry(radius*0.88,32),mat(0x542c25));inside.rotation.x=-Math.PI/2;inside.position.set(x,terrainHeight(x,z)+0.02,z);scene.add(inside);}
+for(let i=0;i<250;i++){const x=random(-180,180),z=random(-180,180);if(Math.abs(x)<12&&Math.abs(z)<12)continue;createRock(x,z,random(0.35,2.1));}
+for(let i=0;i<18;i++)createCrater(random(-150,150),random(-150,150),random(3,9));
+function createMountain(x,z,sx,sy,sz,color){const mountain=new THREE.Mesh(new THREE.SphereGeometry(1,32,20),mat(color));mountain.position.set(x,terrainHeight(x,z)+sy*0.55-1,z);mountain.scale.set(sx,sy,sz);mountain.castShadow=true;mountain.receiveShadow=true;scene.add(mountain);const lower=new THREE.Mesh(new THREE.SphereGeometry(1,24,14),mat(0x70402f));lower.position.set(x,terrainHeight(x,z)-0.3,z);lower.scale.set(sx*1.05,sy*0.25,sz*1.05);scene.add(lower);}
+const mountainColors=[0x754333,0x87503b,0x684438,0xa15b3d,0x795044];for(let i=0;i<28;i++){const angle=i/28*Math.PI*2,distance=random(75,160);createMountain(Math.cos(angle)*distance,Math.sin(angle)*distance,random(10,25),random(8,22),random(10,25),mountainColors[i%mountainColors.length]);}
+const marsSky=new THREE.Mesh(new THREE.SphereGeometry(12,32,32),mat(0xc47a52));marsSky.position.set(-100,95,-250);scene.add(marsSky);
+const rover=new THREE.Group();scene.add(rover);const chassis=new THREE.Group();rover.add(chassis);
+function box(parent,w,h,d,material,x,y,z){const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
+function cylinderBetween(parent,a,b,radius,material){const start=new THREE.Vector3(...a),end=new THREE.Vector3(...b),direction=new THREE.Vector3().subVectors(end,start);const mesh=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,direction.length(),10),material);mesh.position.copy(start).add(end).multiplyScalar(0.5);mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());mesh.castShadow=true;parent.add(mesh);return mesh;}
+box(chassis,4.3,0.55,5.2,whiteMetal,0,1.75,0);box(chassis,3.8,0.25,4.7,darkMetal,0,2.12,0);box(chassis,2.8,0.38,2.7,metal,0,2.42,0);
+box(chassis,1.0,0.75,1.3,whiteMetal,-1.25,2.55,-0.8);box(chassis,1.0,0.75,1.3,whiteMetal,1.25,2.55,-0.8);box(chassis,1.0,0.65,1.2,gold,-1.3,2.35,1.35);box(chassis,1.0,0.65,1.2,metal,1.3,2.35,1.35);
+for(const side of [-1,1]){const panel=box(chassis,1.2,0.08,2.7,mat(0x183f68,0.35,0.4),side*2.4,2.55,0.2);panel.rotation.z=side*0.08;for(let j=0;j<5;j++)box(chassis,0.025,0.09,2.65,mat(0x80a9c8),side*2.4+(j-2)*0.22,2.61,0.2);}
+box(chassis,3.7,0.28,0.3,darkMetal,0,1.25,-2.65);box(chassis,0.25,0.2,0.3,gold,-1.45,1.35,-2.8);box(chassis,0.25,0.2,0.3,gold,1.45,1.35,-2.8);
+const mast=new THREE.Group();mast.position.set(0,2.6,-1.2);chassis.add(mast);cylinderBetween(mast,[0,0,0],[0,1.7,0],0.09,darkMetal);box(mast,0.9,0.55,0.6,whiteMetal,0,1.8,-0.05);box(mast,0.5,0.38,0.4,darkMetal,0,1.82,-0.4);
+for(const x of [-0.23,0.23]){const lens=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.12,16),mat(0x101c2b,0.2,0.5));lens.rotation.x=Math.PI/2;lens.position.set(x,1.83,-0.66);mast.add(lens);}
+const arm=new THREE.Group();arm.position.set(1.65,1.6,-1.7);chassis.add(arm);cylinderBetween(arm,[0,0,0],[0.4,-0.45,-0.45],0.16,gold);cylinderBetween(arm,[0.4,-0.45,-0.45],[0.8,-0.85,-0.8],0.12,metal);cylinderBetween(arm,[0.8,-0.85,-0.8],[0.9,-1.05,-1.0],0.08,darkMetal);const drill=new THREE.Mesh(new THREE.ConeGeometry(0.12,0.55,12),metal);drill.rotation.x=Math.PI;drill.position.set(0.9,-1.25,-1.1);arm.add(drill);
+const wheels=[],steeringWheels=[];
+function createWheel(x,z){const assembly=new THREE.Group();assembly.position.set(x,0.82,z);chassis.add(assembly);const wheel=new THREE.Group();assembly.add(wheel);const tyre=new THREE.Mesh(new THREE.CylinderGeometry(0.77,0.77,0.52,24,1),blackRubber);tyre.rotation.z=Math.PI/2;tyre.castShadow=true;wheel.add(tyre);const rim=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.55,20),metal);rim.rotation.z=Math.PI/2;wheel.add(rim);const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.18,0.58,16),gold);hub.rotation.z=Math.PI/2;wheel.add(hub);for(let i=0;i<22;i++){const angle=i/22*Math.PI*2,tread=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.18,0.57),darkMetal);tread.position.set(Math.cos(angle)*0.75,Math.sin(angle)*0.75,0);tread.rotation.z=angle;wheel.add(tread);}cylinderBetween(chassis,[x*0.72,1.55,z],[x,0.82,z],0.1,darkMetal);cylinderBetween(chassis,[x*0.72,1.45,z+0.3],[x,0.82,z],0.075,gold);wheels.push({wheel,assembly,x,z});if(Math.abs(z)>1.9)steeringWheels.push(assembly);}
+for(const x of [-2.25,2.25]){createWheel(x,-2.0);createWheel(x,0);createWheel(x,2.0);}
+const headlights=[];for(const x of [-1.35,1.35]){const lamp=new THREE.SpotLight(0xffe7bd,0,40,Math.PI/5,0.5,1);lamp.position.set(x,1.7,-2.65);lamp.target.position.set(x,0,-18);chassis.add(lamp);chassis.add(lamp.target);headlights.push(lamp);const bulb=new THREE.Mesh(new THREE.SphereGeometry(0.16,12,12),mat(0xffe7ad,0.25,0.2));bulb.position.set(x,1.55,-2.75);chassis.add(bulb);}
+cylinderBetween(chassis,[1.6,2.2,1.8],[1.6,3.2,1.8],0.035,metal);const antennaDish=new THREE.Mesh(new THREE.SphereGeometry(0.42,20,12,0,Math.PI*2,0,Math.PI/2),whiteMetal);antennaDish.position.set(1.6,3.2,1.8);antennaDish.rotation.x=Math.PI;chassis.add(antennaDish);
+rover.position.set(0,0,0);rover.rotation.y=0;
+const samples=[];function createSample(x,z){const group=new THREE.Group();group.position.set(x,terrainHeight(x,z)+0.6,z);const crystal=new THREE.Mesh(new THREE.OctahedronGeometry(0.48),mat(0x65e5ef,0.25,0.4));crystal.position.y=0.55;crystal.castShadow=true;group.add(crystal);const ring=new THREE.Mesh(new THREE.TorusGeometry(0.7,0.045,8,24),mat(0x6bd8ef,0.35,0.5));ring.rotation.x=Math.PI/2;ring.position.y=0.1;group.add(ring);scene.add(group);samples.push({group,active:true});}
+function placeSamples(){samples.forEach(s=>scene.remove(s.group));samples.length=0;for(let i=0;i<5;i++)createSample(random(-65,65),random(-65,65));}placeSamples();
+const dustGeometry=new THREE.BufferGeometry(),dustCount=500,dustPositions=new Float32Array(dustCount*3);for(let i=0;i<dustCount;i++){dustPositions[i*3]=random(-100,100);dustPositions[i*3+1]=random(1,25);dustPositions[i*3+2]=random(-100,100);}dustGeometry.setAttribute("position",new THREE.BufferAttribute(dustPositions,3));const dustMaterial=new THREE.PointsMaterial({color:0xe0a17a,size:0.35,transparent:true,opacity:0.45});const dust=new THREE.Points(dustGeometry,dustMaterial);scene.add(dust);
+const keys={};let paused=false,headlightsOn=false,speed=0,distance=0,steering=0,collected=0,currentMission="explore",dustStorm=false;
+window.addEventListener("keydown",e=>{keys[e.code]=true;if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code))e.preventDefault();if(e.code==="KeyE")collectSample();if(e.code==="KeyF")toggleLights();if(e.code==="KeyP")togglePause();});
+window.addEventListener("keyup",e=>{keys[e.code]=false;});
+function toggleLights(){headlightsOn=!headlightsOn;headlights.forEach(light=>light.intensity=headlightsOn?4:0);document.getElementById("lightBtn").textContent="Headlights: "+(headlightsOn?"ON":"OFF");}
+function togglePause(){paused=!paused;document.getElementById("pauseBtn").textContent=paused?"Resume":"Pause";showMessage(paused?"ROVER PAUSED":"ROVER RESUMED");}
+document.getElementById("lightBtn").onclick=toggleLights;document.getElementById("pauseBtn").onclick=togglePause;
+let audioContext=null,soundOn=false,audioOscillators=[];
+function toggleSound(){soundOn=!soundOn;document.getElementById("musicBtn").textContent="Sound: "+(soundOn?"ON":"OFF");if(soundOn){try{audioContext=new(window.AudioContext||window.webkitAudioContext)();const master=audioContext.createGain();master.gain.value=0.025;master.connect(audioContext.destination);[55,82.4,110].forEach((frequency,index)=>{const osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.type=index===1?"triangle":"sine";osc.frequency.value=frequency;gain.gain.value=0.25;osc.connect(gain);gain.connect(master);osc.start();audioOscillators.push(osc);});}catch(err){soundOn=false;document.getElementById("musicBtn").textContent="Sound: OFF";}}else{audioOscillators.forEach(o=>{try{o.stop();}catch(e){}});audioOscillators=[];if(audioContext){audioContext.close();audioContext=null;}}}
+document.getElementById("musicBtn").onclick=toggleSound;
+let messageTimer=null;function showMessage(text){const el=document.getElementById("message");el.textContent=text;if(messageTimer)clearTimeout(messageTimer);messageTimer=setTimeout(()=>{el.textContent="W DRIVE  •  A/D STEER  •  E COLLECT SAMPLE";},2600);}
+function collectSample(){if(paused)return;let nearest=null,nearestDistance=Infinity;samples.forEach(sample=>{if(!sample.active)return;const d=rover.position.distanceTo(sample.group.position);if(d<nearestDistance){nearestDistance=d;nearest=sample;}});if(nearest&&nearestDistance<9){nearest.active=false;scene.remove(nearest.group);collected++;document.getElementById("sampleText").textContent="Samples collected: "+collected+" / 5";showMessage("SCIENTIFIC SAMPLE COLLECTED!");if(collected>=5)showMessage("MISSION COMPLETE! ALL 5 SAMPLES COLLECTED!");}else showMessage("NO SAMPLE NEARBY — DRIVE CLOSER");}
+const missionInfo={explore:{title:"MARS ROVER EXPLORATION",guidance:"Drive across the Martian surface. Explore the terrain and collect five scientific samples.",number:"01",storm:false,fog:0.008,sky:0x9a5942},mountain:{title:"MARS MOUNTAIN EXPEDITION",guidance:"Explore the distant dome-shaped mountains. Navigate around rocks and collect five samples.",number:"02",storm:false,fog:0.006,sky:0x875b51},storm:{title:"MARS DUST STORM",guidance:"A dust storm is approaching. Drive carefully, keep control of the rover and collect five samples.",number:"03",storm:true,fog:0.022,sky:0x754532}};
+function setMission(name){currentMission=name;const info=missionInfo[name];dustStorm=info.storm;document.getElementById("missionName").textContent=info.title;document.getElementById("guidance").textContent=info.guidance;document.getElementById("missionHud").textContent=info.number;scene.background.setHex(info.sky);scene.fog.color.setHex(info.sky);scene.fog.density=info.fog;document.querySelectorAll(".mission").forEach(button=>button.classList.toggle("active",button.dataset.mission===name));rover.position.set(0,0,0);rover.rotation.set(0,0,0);speed=0;steering=0;distance=0;collected=0;document.getElementById("distance").textContent="0 m";document.getElementById("sampleText").textContent="Samples collected: 0 / 5";placeSamples();showMessage(info.title+" — MISSION STARTED");}
+document.querySelectorAll(".mission").forEach(button=>button.addEventListener("click",()=>setMission(button.dataset.mission)));
+const desiredCamera=new THREE.Vector3(),lookTarget=new THREE.Vector3();
+function updateCamera(dt){const forward=new THREE.Vector3(0,0,-1);forward.applyQuaternion(rover.quaternion);desiredCamera.copy(rover.position).addScaledVector(forward,-10);desiredCamera.y+=5.5;camera.position.lerp(desiredCamera,1-Math.pow(0.001,dt));lookTarget.copy(rover.position);lookTarget.y+=1.7;camera.lookAt(lookTarget);}
+const clock=new THREE.Clock();
+function updateRover(dt){const forward=keys.KeyW||keys.ArrowUp,backward=keys.KeyS||keys.ArrowDown,left=keys.KeyA||keys.ArrowLeft,right=keys.KeyD||keys.ArrowRight;const maxSpeed=15.5,acceleration=10,braking=16;if(forward)speed+=acceleration*dt;else if(backward)speed-=acceleration*dt;else{if(speed>0)speed=Math.max(0,speed-braking*dt);if(speed<0)speed=Math.min(0,speed+braking*dt);}speed=THREE.MathUtils.clamp(speed,-maxSpeed,maxSpeed);const steeringInput=(left?1:0)-(right?1:0);steering=THREE.MathUtils.damp(steering,steeringInput*0.48,7,dt);const movementFactor=Math.min(Math.abs(speed)/5,1);rover.rotation.y+=steering*movementFactor*dt*(speed>=0?1:-1)*1.45;const direction=new THREE.Vector3(0,0,-1);direction.applyQuaternion(rover.quaternion);rover.position.addScaledVector(direction,speed*dt);rover.position.y=terrainHeight(rover.position.x,rover.position.z);wheels.forEach(({wheel})=>wheel.rotation.x-=speed*dt/0.77);steeringWheels.forEach(assembly=>assembly.rotation.y=steering*0.65);chassis.position.y=0.035*Math.sin(performance.now()*0.004)*Math.min(Math.abs(speed)/5,1);chassis.rotation.z=THREE.MathUtils.damp(chassis.rotation.z,-steering*0.07,4,dt);mast.rotation.y=Math.sin(performance.now()*0.0005)*0.04;distance+=Math.abs(speed)*dt;document.getElementById("speed").textContent=Math.round(Math.abs(speed)*2.3)+" km/h";document.getElementById("distance").textContent=Math.round(distance)+" m";}
+function updateDust(dt){const positions=dust.geometry.attributes.position.array;for(let i=0;i<dustCount;i++){const index=i*3;positions[index]+=dt*(dustStorm?15:2);positions[index+2]+=dt*(dustStorm?8:1);if(positions[index]>100)positions[index]=-100;if(positions[index+2]>100)positions[index+2]=-100;}dust.geometry.attributes.position.needsUpdate=true;dustMaterial.opacity=dustStorm?0.7:0.25;dustMaterial.size=dustStorm?0.55:0.3;}
+function animateSamples(time){samples.forEach(sample=>{if(!sample.active)return;sample.group.rotation.y=time*0.001;sample.group.position.y=terrainHeight(sample.group.position.x,sample.group.position.z)+0.6+Math.sin(time*0.002)*0.15;});}
+function animate(){requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),0.04),time=performance.now();if(!paused){updateRover(dt);updateDust(dt);animateSamples(time);updateCamera(dt);}renderer.render(scene,camera);}
+animate();camera.position.set(0,7,13);camera.lookAt(0,1,0);
+window.addEventListener("resize",()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);});
+showMessage("WELCOME TO MARS — SPACE BOYZ ROVER TRAINING");
+})();
+</script>
+</body>
+</html>
