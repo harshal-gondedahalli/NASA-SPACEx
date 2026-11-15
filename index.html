@@ -335,26 +335,22 @@ window.Academy={awardVoyage:(id)=>{state.voyages=state.voyages||[];if(!state.voy
 <div id="spaceAudioDock" aria-label="Built-in space audio">
  <button id="spaceMusicButton" type="button" aria-pressed="false">♫ Space music: OFF</button>
  <button id="spaceSfxButton" type="button" aria-pressed="true">🔊 SFX ON</button>
- <small id="spaceAudioStatus">Built-in audio · works offline</small>
+ <small id="spaceAudioStatus">Recorded space soundtrack</small>
 </div>
+<script src="simulator/audio.js?v=recorded-music-20261115"></script>
 <script>
 (()=>{'use strict';
- let ctx=null,music=false,sfx=true,master=null,oscillators=[],melodyTimer=null,step=0;
- const $=id=>document.getElementById(id);
- function audio(){if(!ctx){const C=window.AudioContext||window.webkitAudioContext;if(!C){$('spaceAudioStatus').textContent='Audio unavailable in this browser';return null}ctx=new C()}if(ctx.state==='suspended')ctx.resume();return ctx}
- function tone(freq,duration=.18,wave='sine',level=.07){const c=audio();if(!c||!sfx)return;const o=c.createOscillator(),g=c.createGain();o.type=wave;o.frequency.setValueAtTime(freq,c.currentTime);o.frequency.exponentialRampToValueAtTime(Math.max(60,freq*.72),c.currentTime+duration);g.gain.setValueAtTime(level,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+duration);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+duration)}
- function playNote(freq){if(!music||!ctx||!master)return;const o=ctx.createOscillator(),g=ctx.createGain(),f=ctx.createBiquadFilter();o.type='triangle';o.frequency.value=freq;f.type='lowpass';f.frequency.value=3800;g.gain.setValueAtTime(.0001,ctx.currentTime);g.gain.linearRampToValueAtTime(.16,ctx.currentTime+.035);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+.68);o.connect(f);f.connect(g);g.connect(master);o.start();o.stop(ctx.currentTime+.72)}
- function start(){const c=audio();if(!c||music)return;master=c.createGain();master.gain.value=.52;master.connect(c.destination);
-  [164.81,246.94,329.63,493.88].forEach((hz,i)=>{const o=c.createOscillator(),g=c.createGain(),filter=c.createBiquadFilter();o.type=i>1?'sine':'triangle';o.frequency.value=hz;filter.type='lowpass';filter.frequency.value=1800;g.gain.value=[.075,.06,.045,.025][i];o.connect(filter);filter.connect(g);g.connect(master);o.start();oscillators.push(o)});
-  music=true;step=0;const notes=[1046.5,1318.51,1567.98,1760,1567.98,2093,1760,1567.98,1318.51,1567.98,2093,2349.32,2093,1760,1567.98,1318.51];playNote(notes[step]);step=(step+1)%notes.length;melodyTimer=setInterval(()=>{playNote(notes[step]);step=(step+1)%notes.length},420);
-  $('spaceMusicButton').textContent='♫ Space music: ON';$('spaceMusicButton').setAttribute('aria-pressed','true');$('spaceAudioStatus').textContent='Extra-high-pitch cinematic space melody playing'}
- function stop(){music=false;if(melodyTimer){clearInterval(melodyTimer);melodyTimer=null}oscillators.forEach(o=>{try{o.stop()}catch(e){}});oscillators=[];if(master){master.disconnect();master=null} $('spaceMusicButton').textContent='♫ Space music: OFF';$('spaceMusicButton').setAttribute('aria-pressed','false');$('spaceAudioStatus').textContent='Built-in audio ready · works offline'}
- $('spaceMusicButton').addEventListener('click',()=>music?stop():start());
- $('spaceSfxButton').addEventListener('click',()=>{sfx=!sfx;$('spaceSfxButton').textContent=sfx?'🔊 SFX ON':'🔇 SFX OFF';$('spaceSfxButton').setAttribute('aria-pressed',String(sfx));if(sfx)tone(1046.5,.12)});
- function unlockMusic(e){if(e.target.closest&&e.target.closest('#spaceAudioDock'))return;if(!music)start();if(e.target.closest&&(e.target.closest('button')||e.target.closest('a')))tone(880,.09,'sine',.035);document.removeEventListener('pointerdown',unlockMusic);document.removeEventListener('keydown',unlockMusic)}
- document.addEventListener('pointerdown',unlockMusic);document.addEventListener('keydown',unlockMusic);
+ const sound=new OrbitalAudio(),$=id=>document.getElementById(id);let started=false,sfx=true;
+ function ui(){const on=started&&sound.settings.music;$('spaceMusicButton').textContent=on?'♫ Space music: ON':'♫ Space music: OFF';$('spaceMusicButton').setAttribute('aria-pressed',String(on));$('spaceAudioStatus').textContent=sound.musicError||(on?'Orbiting Eternity':'Space music ready');}
+ function start(){started=true;sound.configure({music:true});sound.unlock().then(ui);ui();}
+ $('spaceMusicButton').onclick=()=>{if(!started||!sound.settings.music)start();else{sound.configure({music:false});ui();}};
+ $('spaceSfxButton').onclick=()=>{sfx=!sfx;$('spaceSfxButton').textContent=sfx?'🔊 SFX ON':'🔇 SFX OFF';$('spaceSfxButton').setAttribute('aria-pressed',String(sfx));};
+ function unlock(e){if(e.target.closest?.('#spaceAudioDock'))return;if(!started){started=true;sound.unlock().then(ui);ui();}if(sfx&&e.target.closest?.('button,a'))sound.cue('build');}
+ document.addEventListener('pointerdown',unlock);document.addEventListener('keydown',unlock);
+ document.addEventListener('visibilitychange',()=>sound.setBlocked(document.hidden));window.addEventListener('pagehide',()=>sound.setBlocked(true));window.addEventListener('pageshow',()=>sound.setBlocked(document.hidden));
+ ui();
 })();
-</script></script>
+</script>
 
 <script src="simulator/physics.js?v=parts-20261114-1"></script><script src="simulator/surface-engine.js?v=surface-20261114-1"></script><script src="outpost/engine.js"></script><script src="assets/page-navigation.js?v=pages-20261114-1"></script><script src="assets/dashboard-state.js?v=mission-control-20261114-1"></script><script src="assets/dashboard.js?v=mission-control-20261114-1"></script><script type="module" src="assets/dashboard-scene.js?v=mission-control-20261114-1"></script>
 
