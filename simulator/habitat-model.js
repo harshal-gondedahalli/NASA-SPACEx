@@ -7,7 +7,7 @@ export function habitatModel(kind='habitat'){
  const floor=add(new THREE.CylinderGeometry(7.8,8.4,.45,40),white,g,0,.1);add(new THREE.CylinderGeometry(8.5,9,1.5,40,1,true),mat(0x77776c),shell,0,.45);
  const dome=new THREE.Mesh(new THREE.SphereGeometry(8,40,24,0,Math.PI*2,0,Math.PI/2),new THREE.MeshStandardMaterial({color:0x8fc3d4,transparent:true,opacity:.28,metalness:.25,roughness:.2,side:THREE.DoubleSide,depthWrite:false}));dome.position.y=1.1;shell.add(dome);g.userData.glass=dome;
  for(let i=0;i<8;i++){const rib=add(new THREE.TorusGeometry(8,.075,6,64,Math.PI),white,shell,0,1.1);rib.rotation.y=i*Math.PI/8;}
- const airlock=add(new THREE.CylinderGeometry(1.4,1.4,4.5,20),white,shell,0,1.45,8.8);airlock.rotation.x=Math.PI/2;add(new THREE.BoxGeometry(2.1,2.7,.15),blue,shell,0,1.3,11.1);
+ const airlock=add(new THREE.CylinderGeometry(1.4,1.4,4.5,20),white,shell,0,1.45,8.8);airlock.rotation.x=Math.PI/2;const door=add(new THREE.BoxGeometry(2.1,2.7,.15),blue,shell,0,1.3,11.1);g.userData.airlock=[airlock,door];
  const glow=new THREE.PointLight(0xc2eeff,25,16);glow.position.set(0,4,0);inside.add(glow);add(new THREE.CylinderGeometry(6.8,6.8,.08,40),dark,inside,0,.38);
  for(let x=-5;x<=5;x+=2.5){const rail=add(new THREE.BoxGeometry(.035,.02,11),white,inside,x,.44);}
  if(kind==='lab')for(const x of [-4,4]){add(new THREE.BoxGeometry(2,1.2,5),white,inside,x,1,-.7);for(let z=-2;z<=2;z+=2){add(new THREE.CylinderGeometry(.45,.45,.15,16),dark,inside,x,1.68,z);for(let j=0;j<3;j++){const leaf=add(new THREE.SphereGeometry(.4,10,8),green,inside,x+(j-1)*.25,2,z);leaf.scale.set(.8,1.5,.6);}}}
