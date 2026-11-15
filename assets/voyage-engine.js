@@ -3,7 +3,7 @@
  'use strict';
  const W=1900,H=540,R=16,DOCK={x:1770,y:270,r:76};
  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
- function create(destination='Earth Orbit'){return {destination,stage:'travel',phase:'ready',x:90,y:270,vx:0,vy:0,angle:0,fuel:100,hull:100,time:0,invulnerable:0,gates:[{x:470,y:270,r:82,done:false},{x:920,y:205,r:82,done:false},{x:1370,y:320,r:82,done:false}],obstacles:[{x:650,y:150,r:38},{x:740,y:410,r:48},{x:1110,y:355,r:40},{x:1210,y:100,r:36},{x:1545,y:160,r:46}],message:'',collisions:0};}
+ function create(destination='Earth Orbit'){return {destination,stage:'travel',phase:'ready',x:90,y:270,vx:0,vy:0,angle:0,fuel:100,hull:100,time:0,invulnerable:0,gates:[{x:470,y:270,r:82,done:false},{x:920,y:205,r:82,done:false},{x:1370,y:320,r:82,done:false}],gatekeeper:{x:1600,y:270,r:62,nodes:[{x:1515,y:145,r:42,done:false},{x:1665,y:270,r:42,done:false},{x:1515,y:395,r:42,done:false}],defeated:false},obstacles:[{x:650,y:150,r:38},{x:740,y:410,r:48},{x:1110,y:355,r:40},{x:1210,y:100,r:36},{x:1450,y:75,r:34}],message:'',collisions:0};}
  const speed=s=>Math.hypot(s.vx,s.vy);
  function fail(s,message){s.phase='failed';s.message=message;}
  function step(s,input,dt){
@@ -21,8 +21,10 @@
   if(s.x<R||s.x>W-R||s.y<R||s.y>H-R){hit();s.x=clamp(s.x,R,W-R);s.y=clamp(s.y,R,H-R);s.vx*=-0.35;s.vy*=-0.35;}
   for(const o of s.obstacles){let dx=s.x-o.x,dy=s.y-o.y,d=Math.hypot(dx,dy);if(d<o.r+R){hit();if(d<0.01){dx=1;dy=0;d=1;}const nx=dx/d,ny=dy/d;s.x=o.x+nx*(o.r+R+1);s.y=o.y+ny*(o.r+R+1);const dot=s.vx*nx+s.vy*ny;if(dot<0){s.vx-=1.5*dot*nx;s.vy-=1.5*dot*ny;}}}
   const next=s.gates.find(g=>!g.done);if(next&&Math.hypot(s.x-next.x,s.y-next.y)<next.r-R){next.done=true;s.fuel=Math.min(100,s.fuel+12);}
+  const boss=s.gatekeeper;
+  if(s.gates.every(g=>g.done)&&boss&&!boss.defeated){const node=boss.nodes.find(n=>!n.done);if(node&&Math.hypot(s.x-node.x,s.y-node.y)<node.r-R){node.done=true;s.fuel=Math.min(100,s.fuel+5);if(boss.nodes.every(n=>n.done)){boss.defeated=true;s.message='Mark 15 Gatekeeper shield disabled. Docking corridor open!';}}const coreDistance=Math.hypot(s.x-boss.x,s.y-boss.y);if(coreDistance<boss.r+R){hit();const dx=s.x-boss.x,dy=s.y-boss.y,d=Math.max(1,coreDistance);s.x=boss.x+dx/d*(boss.r+R+2);s.y=boss.y+dy/d*(boss.r+R+2);s.vx*=.45;s.vy*=.45;}}
   if(s.hull<=0)fail(s,'Your hull needs repairs. Give debris more room and use the brake before turning.');
-  else if(s.gates.every(g=>g.done)&&Math.hypot(s.x-DOCK.x,s.y-DOCK.y)<DOCK.r-R&&speed(s)<=65){if(s.destination==='Moon'){s.stage='landing';s.x=950;s.y=95;s.vx=0;s.vy=10;s.angle=-Math.PI/2;s.fuel=Math.max(65,s.fuel);s.message='Lunar approach: land upright on the gold pad.';}else{s.phase='success';s.message='Docking confirmed. Your crew and spacecraft arrived safely!';}}
+  else if(s.gates.every(g=>g.done)&&boss?.defeated&&Math.hypot(s.x-DOCK.x,s.y-DOCK.y)<DOCK.r-R&&speed(s)<=65){if(s.destination==='Moon'){s.stage='landing';s.x=950;s.y=95;s.vx=0;s.vy=10;s.angle=-Math.PI/2;s.fuel=Math.max(65,s.fuel);s.message='Lunar approach: land upright on the gold pad.';}else{s.phase='success';s.message='Docking confirmed. Your crew and spacecraft arrived safely!';}}
   else if(s.fuel<=0&&speed(s)<3)fail(s,'Fuel is empty. Coast between short thrust bursts; each navigation gate restores 12 fuel.');
   else if(s.time>=180)fail(s,'Flight time is up. Follow the next-gate marker and keep moving toward the destination.');
   return s;
