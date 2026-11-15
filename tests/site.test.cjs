@@ -5,6 +5,7 @@ const http=require('node:http');
 const fs=require('node:fs/promises');
 const path=require('node:path');
 const root=path.resolve(__dirname,'..');
+const {createPilot}=require('./helpers/voyage-pilot.cjs');
 
 test('desktop and touch mobile website regression checks',async()=>{
  const server=http.createServer(async(req,res)=>{
@@ -49,11 +50,10 @@ test('desktop and touch mobile website regression checks',async()=>{
     await page.locator('#flightControls').scrollIntoViewIfNeeded();const b=await page.locator('#steerRight').boundingBox(),cdp=await context.newCDPSession(page);const thrustBox=await page.locator('#thrustBtn').boundingBox(),fuelBefore=(await page.evaluate(()=>Voyage.telemetry())).fuel;await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{id:0,x:b.x+b.width/2,y:b.y+b.height/2},{id:1,x:thrustBox.x+thrustBox.width/2,y:thrustBox.y+thrustBox.height/2}]});await page.clock.runFor(300);assert((await page.evaluate(()=>Voyage.telemetry())).angle>.3);assert((await page.evaluate(()=>Voyage.telemetry())).fuel<fuelBefore,'Multi-touch turns and thrusts together');await cdp.send('Input.dispatchTouchEvent',{type:'touchCancel',touchPoints:[]});const a=(await page.evaluate(()=>Voyage.telemetry())).angle;await page.clock.runFor(300);assert.equal((await page.evaluate(()=>Voyage.telemetry())).angle,a,'Cancelled touch releases steering');
    }
    // Fly using only keyboard input and the same public read-only telemetry as the HUD.
-   async function flyRoute(){let held=new Set();
+   async function flyRoute(){let held=new Set();const pilot=createPilot();
    for(let tick=0;tick<900;tick++){
     const state=await page.evaluate(()=>Voyage.telemetry());if(state.phase!=='flying')break;
-    const target=state.gates.find(g=>!g.done)||{x:1770,y:270},dx=target.x-state.x,dy=target.y-state.y,d=Math.hypot(dx,dy),v=Math.hypot(state.vx,state.vy),desired=Math.atan2(dy-state.vy*.7,dx-state.vx*.7),diff=Math.atan2(Math.sin(desired-state.angle),Math.cos(desired-state.angle)),dock=state.gates.every(g=>g.done);
-    const wanted=new Set();if(state.stage==='landing'){if(state.vy>23)wanted.add('ArrowDown');}else{if(diff<-.05)wanted.add('ArrowLeft');if(diff>.05)wanted.add('ArrowRight');if(Math.abs(diff)<.3&&v<(dock&&d<180?48:115))wanted.add('ArrowUp');if(dock&&d<180&&v>45||Math.abs(diff)>1.3&&v>65)wanted.add('ArrowDown');}
+    const input=pilot(state),wanted=new Set();if(state.stage==='landing'){if(state.vy>23)wanted.add('ArrowDown');}else{if(input.left)wanted.add('ArrowLeft');if(input.right)wanted.add('ArrowRight');if(input.thrust)wanted.add('ArrowUp');if(input.brake)wanted.add('ArrowDown');}
     for(const k of held)if(!wanted.has(k))await page.keyboard.up(k);for(const k of wanted)if(!held.has(k))await page.keyboard.down(k);held=wanted;await page.clock.runFor(100);
    }
    for(const k of held)await page.keyboard.up(k);}
