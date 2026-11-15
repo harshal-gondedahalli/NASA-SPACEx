@@ -67,12 +67,15 @@ a{color:var(--cyan)} header{flex-wrap:wrap}.build-layout>*{min-width:0}button,a{
 <section id="a-planets" class="screen"><div class="eyebrow">MISSION 02 / SPACE EXPLORER</div><h1 class="screen-title">🪐 Planet Explorer</h1><p class="sub">Choose a world to visit in your imagination. Collect all four discovery stamps!</p><div class="training-grid"><div class="panel"><div class="planet-display" id="a-planetEmoji">🔴</div><h2 id="a-planetName">Mars</h2><p id="a-planetFact" class="sub"></p><div class="fact" id="a-planetFun"></div><div style="display:flex;gap:9px;margin-top:15px"><button onclick="Academy.changePlanet(-1)">← Previous</button><button class="primary" onclick="Academy.stampPlanet()">Collect discovery stamp ✦</button><button onclick="Academy.changePlanet(1)">Next →</button></div></div><div class="panel"><h3>🌌 Discovery stamps</h3><div id="a-stampList"></div><p class="sub">Discover all four worlds to earn Planet Pathfinder.</p></div></div></section>
 
 <section id="a-gravity" class="screen">
- <div class="eyebrow">ONE SPACE VOYAGE HUB · TWO ADVENTURES</div>
+ <div class="eyebrow">ONE SPACE VOYAGE HUB · THREE ADVENTURES</div>
  <h1 class="screen-title">🌌 Gravity Playground</h1>
- <p class="sub">Choose either adventure from this single mission hub. Each one opens separately in its own full-screen space experience.</p>
+ <p class="sub">Choose an adventure from this single mission hub. Each game opens separately in its own full-screen space experience.</p>
  <div style="max-width:760px;margin:24px auto 0;padding:clamp(18px,3vw,30px);border:1px solid #527c9b;border-radius:22px;background:radial-gradient(ellipse at 50% 0%,#18344a,#0a1424 75%);box-shadow:0 18px 55px #0007">
   <a href="gravity-playground/galaxy-lab/" style="display:flex;align-items:center;gap:16px;width:100%;padding:20px 22px;margin:0 0 14px;border:1px solid #70c5e6;border-radius:15px;background:linear-gradient(110deg,#17394b,#102538);color:#f4fbff;text-decoration:none;font-weight:800;font-size:clamp(17px,2.5vw,22px);box-shadow:0 8px 24px #0004">
    <span style="font-size:32px">🌌</span><span style="flex:1">Try Galaxy Lab<small style="display:block;margin-top:5px;color:#b8d4e5;font-size:13px;font-weight:500">Open the original Galaxy Lab game</small></span><span aria-hidden="true">↗</span>
+  </a>
+  <a href="mark-15/" style="display:flex;align-items:center;gap:16px;width:100%;padding:20px 22px;margin:0 0 14px;border:1px solid #e4a76e;border-radius:15px;background:linear-gradient(110deg,#493322,#241b18);color:#fff8f0;text-decoration:none;font-weight:800;font-size:clamp(17px,2.5vw,22px);box-shadow:0 8px 24px #0004">
+   <span style="font-size:32px">🛞</span><span style="flex:1">Mark 15: Mars Rover Training<small style="display:block;margin-top:5px;color:#f0c9a8;font-size:13px;font-weight:500">Launch the separate 3D Mars rover adventure</small></span><span aria-hidden="true">↗</span>
   </a>
   <a href="mark-16/" style="display:flex;align-items:center;gap:16px;width:100%;padding:20px 22px;border:1px solid #b8a4df;border-radius:15px;background:linear-gradient(110deg,#292b49,#171b31);color:#f8f5ff;text-decoration:none;font-weight:800;font-size:clamp(17px,2.5vw,22px);box-shadow:0 8px 24px #0004">
    <span style="font-size:32px">🧑‍🚀</span><span style="flex:1">Mark 16: Surface Explorer<small style="display:block;margin-top:5px;color:#d2c8eb;font-size:13px;font-weight:500">Launch the separate 3D astronaut adventure</small></span><span aria-hidden="true">↗</span>
