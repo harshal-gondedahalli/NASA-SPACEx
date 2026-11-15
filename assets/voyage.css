@@ -16,3 +16,11 @@ body.voyage-active header{position:static}
  body.voyage-active #missionNav button{flex:1 1 130px}
  body.voyage-active #navContinue{flex-basis:100%}
 }
+
+/* Analogue pilot joystick for the existing Satellite Operator flight screen. */
+.voyage-view{position:relative}
+.flight-joystick{position:absolute;z-index:4;left:16px;bottom:16px;width:124px;height:124px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#163b5ddd,#07162ddd);border:2px solid #67e8ff99;box-shadow:0 0 24px #28cfff33,inset 0 0 18px #4bdfff22;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.flight-joystick-ring{position:absolute;inset:12%;border:1px dashed #8cecff66;border-radius:50%;pointer-events:none}
+.flight-joystick-knob{width:48px;height:48px;border-radius:50%;background:linear-gradient(145deg,#a4f5ff,#1685b8);border:2px solid #e0fbff;box-shadow:0 5px 18px #00bde988;pointer-events:none;z-index:1}
+.flight-joystick>span{position:absolute;bottom:5px;font-size:9px;letter-spacing:1px;color:#a9eaff;pointer-events:none}
+@media(max-width:480px){.flight-joystick{width:112px;height:112px;left:10px;bottom:10px}.flight-joystick-knob{width:44px;height:44px}}
