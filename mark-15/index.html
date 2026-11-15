@@ -107,7 +107,7 @@ function musicUI(){musicButton.textContent=soundOn?"♫ Music ON":"♫ Music OFF
 function syncMusic(){
  if(!soundOn||paused||document.hidden){roverMusic.pause();return;}
  if(!roverMusic.paused||musicPending)return;
- musicPending=true;Promise.resolve(roverMusic.play()).then(()=>{if(!soundOn||paused||document.hidden)roverMusic.pause();}).catch(()=>{soundOn=false;musicUI();showMessage("Music could not play. Tap Music to retry.");}).finally(()=>{musicPending=false;});
+ musicPending=true;Promise.resolve(roverMusic.play()).then(()=>{if(!soundOn||paused||document.hidden)roverMusic.pause();}).catch(error=>{if(error.name==="AbortError")return;soundOn=false;musicUI();showMessage("Music could not play. Tap Music to retry.");}).finally(()=>{musicPending=false;if(soundOn&&!paused&&!document.hidden&&roverMusic.paused)syncMusic();});
 }
 function toggleSound(){soundOn=!soundOn;musicUI();syncMusic();}
 roverMusic.addEventListener("error",()=>{soundOn=false;musicUI();showMessage("Music could not load. Tap Music to retry.");});
