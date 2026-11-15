@@ -25,7 +25,7 @@ document.querySelectorAll('[data-flight]').forEach(b=>{
  }
  function announce(text){if(text!==lastAnnouncement){$('voyageLive').textContent=text;lastAnnouncement=text;}}
  function start(name){cancelAnimationFrame(frame);destinationName=name;s=E.create(name);countdown=3;lastHud=0;lastAnnouncement='';clearInput();$('launchActions').classList.add('hidden');$('pauseFlight').disabled=true;$('pauseFlight').textContent='Pause';
-  overlay('✦','Your voyage to '+name,'Pass all 3 glowing gates, then disable the MARK 15 GATEKEEPER by flying through its 3 cyan signal nodes. Avoid its central shield and the rocks, then brake to 65 or less inside the gold docking zone. Gates restore 12 fuel; signal nodes restore 5.'+(name==='Moon'?' Then land upright on the lunar pad. Brake uses fuel during landing; aim for vertical speed ≤ 28 and horizontal speed ≤ 15.':''),begin,'Ready for launch →');
+  overlay('✦','Your voyage to '+name,'Pass all 3 glowing gates, then disable the MARK 15 GATEKEEPER by flying through its 3 cyan signal nodes. Avoid its central shield and the rocks, then brake to 65 or less inside the gold docking zone. Gates restore 12 fuel; signal nodes restore 5.'+(['Moon','Mars','Mercury','Venus'].includes(name)?' Then descend and land upright on the surface pad. Brake uses fuel during landing; aim for vertical speed ≤ 28 and horizontal speed ≤ 15.':''),begin,'Ready for launch →');
   hud();render();last=0;accumulator=0;frame=requestAnimationFrame(loop);window.MissionControl?.refreshNav();
  }
  function begin(){s.phase='countdown';countdown=3;last=0;accumulator=0;$('pauseFlight').disabled=false;clearInput();canvas.focus({preventScroll:true});$('voyagePrimary').hidden=true;$('voyageTitle').textContent='3';$('voyageExplanation').textContent='Hands on the controls, astronaut.';}
@@ -37,7 +37,7 @@ document.querySelectorAll('[data-flight]').forEach(b=>{
   if(s.phase==='success'){
    const report={destination:destinationName,landed:s.stage==='landing',score:E.rating(s),fuel:Math.round(s.fuel),hull:s.hull,seconds:Math.round(s.time)};
    JuniorSave.data.voyage=report;JuniorSave.write();$('launchActions').classList.remove('hidden');
-   overlay('✧',s.stage==='landing'?'Lunar landing successful!':'Docking successful!',`${report.score}/100 flight score · ${report.hull}% hull · ${report.fuel}% fuel · ${report.seconds}s. ${s.message}`,()=>{$('continueFlight').click();},'Explore your destination →',true);
+   overlay('✧',s.stage==='landing'?'Planetary landing successful!':'Docking successful!',`${report.score}/100 flight score · ${report.hull}% hull · ${report.fuel}% fuel · ${report.seconds}s. ${s.message}`,()=>{$('continueFlight').click();},'Explore your destination →',true);
   }else overlay('↻','Let’s try that again',s.message,()=>start(destinationName),'Retry mission →');
   window.MissionControl?.refreshNav();
  }
