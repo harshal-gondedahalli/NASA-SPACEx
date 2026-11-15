@@ -50,9 +50,10 @@ canvas{display:block}
 <div id="left" class="panel"><h3>MISSION GUIDANCE</h3><p id="missionName">MARS ROVER EXPLORATION</p><p id="guidance">Drive across the Martian surface. Explore the terrain and collect scientific samples.</p><p>Explore the red planet and watch your rover telemetry.</p><p id="sampleText">Samples collected: 0 / 5</p></div>
 <div id="right" class="panel"><h3>MISSION SELECT</h3><button class="mission active" data-mission="explore">01 • Mars Rover Exploration</button><button class="mission" data-mission="mountain">02 • Mountain Expedition</button><button class="mission" data-mission="storm">03 • Mars Dust Storm</button><hr style="border-color:#29445d"><h3>ROVER SYSTEMS</h3><p id="systemStatus">All systems operational</p><p>Drive system: ONLINE</p><p>Navigation: ACTIVE</p><p>Solar power: 96%</p></div>
 <div id="message">MISSION READY — PRESS W TO DRIVE</div>
-<div id="buttons"><button class="action" id="lightBtn">Headlights: OFF</button><button class="action" id="musicBtn">Sound: OFF</button><button class="action" id="pauseBtn">Pause</button></div>
+<div id="buttons"><button class="action" id="lightBtn">Headlights: OFF</button><button class="action" id="musicBtn" aria-pressed="false" title="Beyond the Event Horizon">♫ Music OFF</button><button class="action" id="pauseBtn">Pause</button></div>
 <div id="controls"><b>ROVER CONTROLS</b><br>W / ↑ : Drive forward<br>S / ↓ : Reverse<br>A / ← : Turn left<br>D / → : Turn right<br>E : Collect sample<br>F : Headlights<br>P : Pause / Resume</div>
 <div id="hud"><div class="stat"><small>SPEED</small><strong id="speed">0 km/h</strong></div><div class="stat"><small>DISTANCE</small><strong id="distance">0 m</strong></div><div class="stat"><small>BATTERY</small><strong>96%</strong></div><div class="stat"><small>MISSION</small><strong id="missionHud">01</strong></div></div>
+<audio id="roverMusic" src="../public/audio/beyond-the-event-horizon.mp3" preload="none" loop hidden></audio>
 <script type="module">
 import * as THREE from "../simulator/vendor/three.module.min.js";
 (() => {
@@ -98,10 +99,19 @@ const keys={};let paused=false,headlightsOn=false,speed=0,distance=0,steering=0,
 window.addEventListener("keydown",e=>{keys[e.code]=true;if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code))e.preventDefault();if(e.code==="KeyE")collectSample();if(e.code==="KeyF")toggleLights();if(e.code==="KeyP")togglePause();});
 window.addEventListener("keyup",e=>{keys[e.code]=false;});
 function toggleLights(){headlightsOn=!headlightsOn;headlights.forEach(light=>light.intensity=headlightsOn?4:0);document.getElementById("lightBtn").textContent="Headlights: "+(headlightsOn?"ON":"OFF");}
-function togglePause(){paused=!paused;document.getElementById("pauseBtn").textContent=paused?"Resume":"Pause";showMessage(paused?"ROVER PAUSED":"ROVER RESUMED");}
+function togglePause(){paused=!paused;document.getElementById("pauseBtn").textContent=paused?"Resume":"Pause";showMessage(paused?"ROVER PAUSED":"ROVER RESUMED");syncMusic();}
 document.getElementById("lightBtn").onclick=toggleLights;document.getElementById("pauseBtn").onclick=togglePause;
-let audioContext=null,soundOn=false,audioOscillators=[];
-function toggleSound(){soundOn=!soundOn;document.getElementById("musicBtn").textContent="Sound: "+(soundOn?"ON":"OFF");if(soundOn){try{audioContext=new(window.AudioContext||window.webkitAudioContext)();const master=audioContext.createGain();master.gain.value=0.025;master.connect(audioContext.destination);[220,329.6,440].forEach((frequency,index)=>{const osc=audioContext.createOscillator(),gain=audioContext.createGain();osc.type=index===1?"triangle":"sine";osc.frequency.value=frequency;gain.gain.value=0.25;osc.connect(gain);gain.connect(master);osc.start();audioOscillators.push(osc);});}catch(err){soundOn=false;document.getElementById("musicBtn").textContent="Sound: OFF";}}else{audioOscillators.forEach(o=>{try{o.stop();}catch(e){}});audioOscillators=[];if(audioContext){audioContext.close();audioContext=null;}}}
+const roverMusic=document.getElementById("roverMusic"),musicButton=document.getElementById("musicBtn");let soundOn=false,musicPending=false;
+roverMusic.volume=0.24;
+function musicUI(){musicButton.textContent=soundOn?"♫ Music ON":"♫ Music OFF";musicButton.setAttribute("aria-pressed",String(soundOn));musicButton.setAttribute("aria-label",(soundOn?"Turn off ":"Play ")+"Beyond the Event Horizon");}
+function syncMusic(){
+ if(!soundOn||paused||document.hidden){roverMusic.pause();return;}
+ if(!roverMusic.paused||musicPending)return;
+ musicPending=true;Promise.resolve(roverMusic.play()).then(()=>{if(!soundOn||paused||document.hidden)roverMusic.pause();}).catch(()=>{soundOn=false;musicUI();showMessage("Music could not play. Tap Music to retry.");}).finally(()=>{musicPending=false;});
+}
+function toggleSound(){soundOn=!soundOn;musicUI();syncMusic();}
+roverMusic.addEventListener("error",()=>{soundOn=false;musicUI();showMessage("Music could not load. Tap Music to retry.");});
+document.addEventListener("visibilitychange",syncMusic);window.addEventListener("pagehide",()=>roverMusic.pause());window.addEventListener("pageshow",syncMusic);musicUI();
 document.getElementById("musicBtn").onclick=toggleSound;
 let messageTimer=null;function showMessage(text){const el=document.getElementById("message");el.textContent=text;if(messageTimer)clearTimeout(messageTimer);messageTimer=setTimeout(()=>{el.textContent="W DRIVE  •  A/D STEER  •  E COLLECT SAMPLE";},2600);}
 function collectSample(){if(paused)return;let nearest=null,nearestDistance=Infinity;samples.forEach(sample=>{if(!sample.active)return;const d=rover.position.distanceTo(sample.group.position);if(d<nearestDistance){nearestDistance=d;nearest=sample;}});if(nearest&&nearestDistance<9){nearest.active=false;scene.remove(nearest.group);collected++;document.getElementById("sampleText").textContent="Samples collected: "+collected+" / 5";showMessage("SCIENTIFIC SAMPLE COLLECTED!");if(collected>=5)showMessage("MISSION COMPLETE! ALL 5 SAMPLES COLLECTED!");}else showMessage("NO SAMPLE NEARBY — DRIVE CLOSER");}
