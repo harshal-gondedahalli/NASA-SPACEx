@@ -3,13 +3,14 @@
  'use strict';
  const E=VoyageEngine,$=id=>document.getElementById(id),canvas=$('voyageCanvas'),ctx=canvas.getContext('2d');
  let s=E.create(),destinationName='',frame=0,last=0,accumulator=0,countdown=3,pausedFrom='flying',lastAnnouncement='',lastHud=0;
- const input={left:false,right:false,thrust:false,brake:false},pointers=new Map(),keys=new Set();
+ const input={left:false,right:false,thrust:false,brake:false},pointers=new Map(),keys=new Set(),stick={x:0,y:0,pointer:null};
  const stars=Array.from({length:150},(_,i)=>({x:(i*173.57)%2300,y:(i*97.13)%540,r:i%4===0?1.5:.7}));
  function active(){return $('launch').classList.contains('active');}
- function clearInput(){keys.clear();pointers.clear();for(const k in input)input[k]=false;document.querySelectorAll('[data-flight]').forEach(b=>b.classList.remove('held'));}
- function updateInput(){for(const k in input)input[k]=[...keys].some(code=>mapping[code]===k)||[...pointers.values()].includes(k);document.querySelectorAll('[data-flight]').forEach(b=>b.classList.toggle('held',input[b.dataset.flight]));}
+ function clearInput(){keys.clear();pointers.clear();stick.x=stick.y=0;stick.pointer=null;const knob=$('flightJoystickKnob');if(knob)knob.style.transform='translate(0,0)';for(const k in input)input[k]=false;document.querySelectorAll('[data-flight]').forEach(b=>b.classList.remove('held'));}
+ function updateInput(){for(const k in input)input[k]=[...keys].some(code=>mapping[code]===k)||[...pointers.values()].includes(k);input.left=input.left||stick.x<-.28;input.right=input.right||stick.x>.28;input.thrust=input.thrust||stick.y<-.28;input.brake=input.brake||stick.y>.42;document.querySelectorAll('[data-flight]').forEach(b=>b.classList.toggle('held',input[b.dataset.flight]));}
  const mapping={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'thrust',KeyW:'thrust',Space:'thrust',ArrowDown:'brake',KeyS:'brake'};
- document.querySelectorAll('[data-flight]').forEach(b=>{
+ const stickBase=$('flightJoystick'),stickKnob=$('flightJoystickKnob');function steerStick(e){const r=stickBase.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),limit=r.width*.31,len=Math.hypot(dx,dy)||1,k=Math.min(1,limit/len);stick.x=dx*k/limit;stick.y=dy*k/limit;stickKnob.style.transform='translate('+stick.x*limit+'px,'+stick.y*limit+'px)';updateInput()}function releaseStick(){stick.pointer=null;stick.x=stick.y=0;stickKnob.style.transform='translate(0,0)';updateInput()}stickBase.addEventListener('pointerdown',e=>{if(s.phase!=='flying'||e.button!==0)return;e.preventDefault();stick.pointer=e.pointerId;stickBase.setPointerCapture(e.pointerId);steerStick(e)});stickBase.addEventListener('pointermove',e=>{if(stick.pointer===e.pointerId)steerStick(e)});['pointerup','pointercancel','lostpointercapture'].forEach(ev=>stickBase.addEventListener(ev,releaseStick));
+document.querySelectorAll('[data-flight]').forEach(b=>{
   b.addEventListener('pointerdown',e=>{if(s.phase!=='flying'||e.button!==0)return;e.preventDefault();b.setPointerCapture(e.pointerId);pointers.set(e.pointerId,b.dataset.flight);updateInput();});
   for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,e=>{pointers.delete(e.pointerId);updateInput();});
  });
