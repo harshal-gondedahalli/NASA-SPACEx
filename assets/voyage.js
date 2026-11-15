@@ -62,6 +62,13 @@ document.querySelectorAll('[data-flight]').forEach(b=>{
   ctx.setTransform(scale,0,0,scale,0,0);ctx.fillStyle='#070f21';ctx.fillRect(0,0,viewW,E.H);
   const nebula=ctx.createRadialGradient(viewW*.7,140,0,viewW*.7,140,500);nebula.addColorStop(0,'#20344b');nebula.addColorStop(1,'#070f21');ctx.fillStyle=nebula;ctx.fillRect(0,0,viewW,E.H);
   for(const a of stars){const x=((a.x-camera*.25)%viewW+viewW)%viewW;ctx.globalAlpha=.3+(a.r/3);ctx.fillStyle='#d8eaff';ctx.beginPath();ctx.arc(x,a.y,a.r,0,Math.PI*2);ctx.fill();}ctx.globalAlpha=1;
+  // A miniature solar-system panorama remains visible behind the flight path.
+  const sunX=105-(camera*.07),sunY=112;ctx.save();ctx.globalAlpha=.72;ctx.strokeStyle='#8fb9e044';ctx.lineWidth=1;
+  const orbitSizes=[75,112,150,190,235,282,330,378];orbitSizes.forEach((rx,i)=>{ctx.beginPath();ctx.ellipse(sunX,sunY,rx,rx*.36,0,0,Math.PI*2);ctx.stroke();});
+  const sunGlow=ctx.createRadialGradient(sunX,sunY,4,sunX,sunY,47);sunGlow.addColorStop(0,'#fff6bd');sunGlow.addColorStop(.3,'#ffbf62');sunGlow.addColorStop(1,'#ff8b2d00');ctx.fillStyle=sunGlow;ctx.beginPath();ctx.arc(sunX,sunY,47,0,Math.PI*2);ctx.fill();
+  const miniPlanets=[['#9b9185',75,0,3],['#e5b77d',112,1.8,4],['#4c9ee8',150,3.7,5],['#c86c4e',190,5.4,4],['#d6b28b',235,2.2,9],['#e4cf9a',282,4.4,8],['#9cdbd4',330,1.1,6],['#5489e6',378,3.1,6]];
+  miniPlanets.forEach(([color,rx,phase,r])=>{const x=sunX+Math.cos(phase)*rx,y=sunY+Math.sin(phase)*rx*.36;ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();if(rx===282){ctx.strokeStyle='#e8d7a888';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(x,y,r+7,r*.65,0,0,Math.PI*2);ctx.stroke();}});
+  ctx.restore();
   ctx.save();ctx.translate(-camera,0);
   if(s.stage==='landing'){const surface=s.destination==='Mars'?'#7c443b':s.destination==='Venus'?'#9b7048':s.destination==='Mercury'?'#77736d':'#666775';const horizon=ctx.createLinearGradient(0,300,0,540);horizon.addColorStop(0,surface);horizon.addColorStop(1,'#242632');ctx.fillStyle=horizon;ctx.fillRect(0,300,E.W,240);for(let i=0;i<18;i++){const x=(i*137+53)%E.W,y=350+(i*29)%145;ctx.strokeStyle='#171c2b66';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(x,y,12+(i%5)*5,4+(i%3)*3,0,0,Math.PI*2);ctx.stroke();}ctx.fillStyle='#ffd166';ctx.fillRect(E.PAD.x-E.PAD.halfWidth,E.PAD.y-5,E.PAD.halfWidth*2,5);ctx.fillStyle='#ffe7a3';ctx.font='bold 14px system-ui';ctx.textAlign='center';ctx.fillText('LAND UPRIGHT · VERTICAL ≤ 28 · HORIZONTAL ≤ 15',E.PAD.x,E.PAD.y+30);}
   else {
