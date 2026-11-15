@@ -67,14 +67,14 @@ document.querySelectorAll('[data-flight]').forEach(b=>{
   ctx.save();ctx.translate(-camera,0);
   const sun={x:115,y:270};
   const worlds=[
-   {name:'MERCURY',x:275,y:270,r:10,c:'#a9a39b'},
-   {name:'VENUS',x:440,y:270,r:16,c:'#e4bd83'},
-   {name:'EARTH',x:635,y:270,r:19,c:'#398fe0'},
-   {name:'MARS',x:825,y:270,r:14,c:'#c96b50'},
-   {name:'JUPITER',x:1110,y:270,r:39,c:'#d7b28b'},
-   {name:'SATURN',x:1400,y:270,r:34,c:'#e3d09c',rings:true},
-   {name:'URANUS',x:1650,y:270,r:25,c:'#9bd8d4'},
-   {name:'NEPTUNE',x:1880,y:270,r:24,c:'#527fd4'}
+   {name:'MERCURY',x:275,y:245,r:10,c:'#a9a39b'},
+   {name:'VENUS',x:440,y:315,r:16,c:'#e4bd83'},
+   {name:'EARTH',x:635,y:205,r:19,c:'#398fe0'},
+   {name:'MARS',x:825,y:340,r:14,c:'#c96b50'},
+   {name:'JUPITER',x:1110,y:155,r:39,c:'#d7b28b'},
+   {name:'SATURN',x:1400,y:390,r:34,c:'#e3d09c',rings:true},
+   {name:'URANUS',x:1650,y:185,r:25,c:'#9bd8d4'},
+   {name:'NEPTUNE',x:1880,y:355,r:24,c:'#527fd4'}
   ];
   ctx.save();ctx.globalAlpha=.42;ctx.strokeStyle='#8fb9e0';ctx.lineWidth=1.4;
   worlds.forEach((p,i)=>{ctx.beginPath();ctx.ellipse(sun.x,sun.y,p.x-sun.x,(p.x-sun.x)*.19,0,0,Math.PI*2);ctx.stroke();});
