@@ -33,7 +33,7 @@ for(const mobile of [false,true])test('Page navigation '+(mobile?'mobile':'deskt
   await click('header a[href="../#home"]');await route('home');
   await page.goto(base+'solar-system/');await click('header a[href="../#missions"]');await route('missions');await aligned('missions');
   await click('.outpost-legacy-link');await page.waitForURL(base+'outpost/');await click('footer a[href="../#missions"]');await route('missions');
-  await click('.missions a[href^="simulator/"]');await page.waitForFunction(()=>window.SimLab);await click('#menuBtn');await click('#settingsDialog a[href="../#missions"]');await route('missions');await aligned('missions');
+  await click('.missions a[href^="simulator/?v="]');await page.waitForFunction(()=>window.SimLab);await click('#menuBtn');await click('#settingsDialog a[href="../#missions"]');await route('missions');await aligned('missions');
   await page.goto(base+'#launch');await route('testing','testing');assert(await page.locator('#launchBtn').isVisible());
   await nav('voyage');await route('voyage');await aligned('voyage');
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));

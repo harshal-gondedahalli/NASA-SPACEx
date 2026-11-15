@@ -35,7 +35,7 @@ Choose **🌍 → 🌙 Expedition** in Rocket Builder, or open settings and tap 
 
 ## Rocket Builder
 
-Open [Rocket Builder](https://hrashal-gondedahalli.github.io/NASA-SPACEx/simulator/?v=space-20261113-4).
+Open [Rocket Builder](https://hrashal-gondedahalli.github.io/NASA-SPACEx/simulator/?v=requests-20261115-1).
 
 - 17 illustrated parts across control, landing, protection, staging, fuel, engines, boosters, utility and aero. Tap or drag to add to either connected stage; tap fitted equipment to remove it. Counts are capped, and undo/save/load remain available.
 - Four tank sizes change fuel capacity, mass and visible height. Three engine types change thrust, efficiency and dry mass; choosing a type changes the selected stage's engine type. Side boosters add fuel, thrust and mass and require side releases.
@@ -124,3 +124,13 @@ Use WASD/arrows to move/steer, E to interact, Space/Shift to change height in fl
 Mark 15 saves one independent session under `junior-mark15-v1`; restoration validates data and opens the menu safely stopped. Existing simulator, Academy and outpost saves are untouched. Blocked storage leaves in-memory continuation usable. Pause, focus loss and emergency choices freeze the game and release inputs. Scene rebuilds dispose owned geometry/materials/textures; WebGL failure shows a clear return link. Existing procedural music is retained and silenced while paused/in menus.
 
 Tests cover terrain, collisions/bounds, six wheel-contact heights, acceleration/braking, pause/emergency freeze, sample completion through genuine movement, safe restore, desktop/mobile navigation, all five missions, graphics settings and missing WebGL. Surface imagery credits remain in `simulator/textures/CREDITS.md`; all new rover and surface detail is original procedural geometry/texturing.
+
+## Requested mission additions — 15 November 2026
+
+Earth launch and Expedition now show a three-second countdown with pause/cancel before ignition. Fuel and mission time remain frozen during the countdown. Liftoff opens full throttle. Lunar/orbit practice starts directly. Launch shake is an optional canvas effect; reduced-motion preferences disable it, pausing stops it, and supported mobile browsers may provide a short vibration. Instruments remain stable. The builder grid is monochrome.
+
+Open `simulator/?survey=new` for a standalone Moonbase camp without claiming a completed flight. Two original dome habitats include furniture, a science greenhouse and a console. Navigate to their airlocks on foot, cycle the lock, walk around inside, replenish reserves and exit. Survey saves preserve the room; loading cancels an unfinished airlock cycle safely. The same camp remains available after a lunar landing. Mark 15/16 Moon scenes show matching domes and link to the walkable camp.
+
+The camp includes a fictional solar-particle-event training timer: a warning, an active interval, a visible exposure meter and modeled shelter protection inside the domes. Pause freezes the event. This is not live space weather or a radiation-dose calculation; the cutaway domes and assumed shielding are illustrative, not validated habitat engineering. There is no wind, rain or lightning storm on the Moon. Rover marks are dark, bounded instanced terrain marks in the camp and both Mark explorers; they are visual and reset when the scene reloads.
+
+`space-lab/` provides three separate original relative-motion activities: an illustrative ISS docking approach, satellite delivery/deployment and a three-beacon spacecraft explorer. Thrusters change velocity; coasting preserves it; braking consumes fuel. Docking requires slow, aligned contact held for one second and high-speed station impacts fail. Mission completion records save locally. These are local relative-frame trainers, not an ISS operational simulator or an additional orbital propagation model. Keyboard and simultaneous touch controls, pause/focus handling, restart and WebGL fallback are provided.

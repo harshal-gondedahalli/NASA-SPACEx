@@ -1,4 +1,4 @@
-import { MarkView } from './visuals.js?v=hd-20261114-1';
+import { MarkView } from './visuals.js?v=requests-20261115-1';
 const T=window.MarkTerrain,$=id=>document.getElementById(id),KEY='junior-mark15-v1',keyboard=new Set(),touches=new Map();let state=T.create(),view,menu=true,pausedBeforeHelp=false,last=0,nextDraw=0,nextHud=0,nextSave=0,quality='auto',saved=null,storageOK=true,drag=null,pinch=0,renderDirty=false;const pointers=new Map();
 try{const raw=localStorage.getItem(KEY);if(raw)saved=T.restore(raw);}catch{storageOK=false;}
 function save(){saved=T.restore(JSON.stringify(state));try{localStorage.setItem(KEY,JSON.stringify(state));storageOK=true;}catch{storageOK=false;}$('storageStatus').textContent=storageOK?'':'Saving unavailable · keep this tab open';}
